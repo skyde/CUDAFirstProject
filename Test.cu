@@ -1,23 +1,86 @@
+
+//#include "GL/glut.h"
+// OpenGL Graphics includes
+//#include <GL/glew.h>
+//#if defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64)
+//#include <GL/wglew.h>
+//#endif
+//#if defined(__APPLE__) || defined(__MACOSX)
+//  #pragma clang diagnostic ignored "-Wdeprecated-declarations"
+//  #include <GLUT/glut.h>
+//  #ifndef glutCloseFunc
+//  #define glutCloseFunc glutWMCloseFunc
+//  #endif
+//#else
+//#include <GL/freeglut.h>
+//#endif
+//
+//// CUDA runtime
+//// CUDA utilities and system includes
+//#include <cuda_runtime.h>
+//#include <cuda_gl_interop.h>
+//
+//#include <helper_functions.h>
+//#include <helper_cuda.h>
+//#include <helper_cuda_gl.h>
+//#include <rendercheck_gl.h>
+
+
 #include <stdio.h>
-//using namespace std;
+#include <iostream>
+using namespace std;
 
 void random_ints(int* a, int n);
+void initGL(int *argc, char **argv);
 
+// Total Threads
 #define N (2048 * 2048)
+// Block Size
 #define M 512
 
-__global__ void add(int *a, int *b, int *c, int n)
-{
-	int index = threadIdx.x + blockIdx.x * blockDim.x;
+#define RADIUS 1
 
-	if(index < n)
+//__global__ void add(int *a, int *b, int *c, int n)
+//{
+//	int index = threadIdx.x + blockIdx.x * blockDim.x;
+//
+//	if(index < n)
+//	{
+//		c[index] = a[index] + b[index];
+//	}
+//}
+
+__global__ void stencil_1d(int* in, int* out)
+{
+	__shared__ int temp[M + 2 * RADIUS];
+	int gindex = threadIdx.x + blockIdx.x * blockDim.x;
+	int lindex = threadIdx.x + RADIUS;
+
+	temp[lindex] = in[gindex];
+
+	if(threadIdx.x < RADIUS)
 	{
-		c[index] = a[index] + b[index];
+		temp[lindex - RADIUS] = in[gindex - RADIUS];
+		temp[lindex + M] = in[gindex + M];
 	}
+
+	__syncthreads();
+
+	int result = 0;
+
+	for	(int offset = -RADIUS; offset <= RADIUS; offset++)
+	{
+		result += temp[lindex + offset];
+	}
+
+	out[gindex] = result;
 }
 
-int main(void)
+
+int main(int argc, char **argv)
 {
+//	initGL(&argc, argv);
+
 	int *a, *b, *c;
 	int *d_a, *d_b, *d_c;
 	int size = N * sizeof(int);
@@ -36,13 +99,13 @@ int main(void)
 	cudaMemcpy(d_a, a, size, cudaMemcpyHostToDevice);
 	cudaMemcpy(d_b, b, size, cudaMemcpyHostToDevice);
 
-	add<<<((N + M - 1) / M), M>>>(d_a, d_b, d_c, N);
+	stencil_1d<<<((N + M - 1) / M), M>>>(d_a, d_c);
 
 	cudaMemcpy(c, d_c, size, cudaMemcpyDeviceToHost);
 
 	for(int i = 0; i < N && i < 512; i++)
 	{
-		printf ("%d + %d = %d \n", *(a + i), *(b + i), *(c + i));
+		printf ("%d = %d \n", a[i], c[i]);
 	}
 
 	free(a);
@@ -53,15 +116,46 @@ int main(void)
 	cudaFree(d_b);
 	cudaFree(d_c);
 
-//	cout << "test";
 	return 0;
 }
-
+//
+//void initGL(int *argc, char **argv)
+//{
+////    printf("Initializing GLUT...\n");
+////    glutInit(argc, argv);
+////
+////    glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);
+////    glutInitWindowSize(1024, 768);
+////    glutInitWindowPosition(0, 0);
+////    glutCreateWindow(argv[0]);
+////
+//////    glutDisplayFunc(displayFunc);
+//////    glutKeyboardFunc(keyboardFunc);
+//////    glutMouseFunc(clickFunc);
+//////    glutMotionFunc(motionFunc);
+//////    glutReshapeFunc(reshapeFunc);
+//////    glutTimerFunc(REFRESH_DELAY, timerEvent, 0);
+//////    initMenus();
+////
+////    printf("Loading extensions: %s\n", glewGetErrorString(glewInit()));
+////
+////    if (!glewIsSupported("GL_VERSION_1_5 GL_ARB_vertex_buffer_object GL_ARB_pixel_buffer_object"))
+////    {
+////        fprintf(stderr, "Error: failed to get minimal extensions for demo\n");
+////        fprintf(stderr, "This sample requires:\n");
+////        fprintf(stderr, "  OpenGL version 1.5\n");
+////        fprintf(stderr, "  GL_ARB_vertex_buffer_object\n");
+////        fprintf(stderr, "  GL_ARB_pixel_buffer_object\n");
+////        exit(EXIT_SUCCESS);
+////    }
+////
+////    printf("OpenGL window created.\n");
+//}
 void random_ints(int* a, int n)
 {
 	int i;
 	for (i = 0; i < n; ++i)
 	{
-		a[i] = rand() % 50;
+		a[i] = rand() % 4;
 	}
 }
