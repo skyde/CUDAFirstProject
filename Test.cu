@@ -92,7 +92,7 @@ int main(int argc, char **argv)
 {
 //	initGL(&argc, argv);
 
-	SharedData<double>* test = new SharedData<double>(12);
+	SharedData<double>* test = new SharedData<double>(N);
 
 //	double *inputs;
 //	double *outputs;
@@ -131,6 +131,8 @@ int main(int argc, char **argv)
 	cudaFree(d_a);
 	cudaFree(d_b);
 	cudaFree(d_c);
+
+	delete test;
 
 	return 0;
 }

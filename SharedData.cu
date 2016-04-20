@@ -1,12 +1,5 @@
-/*
-// * Layer.h
-// *
-// *  Created on: Apr 20, 2016
-// *      Author: admin
-// */
-//
-//#ifndef LAYER_H_
-//#define LAYER_H_
+#include <iostream>
+using namespace std;
 
 template <class T> class SharedData
 {
@@ -15,12 +8,16 @@ public:
 	{
 		HostData = (T *) malloc(Length);
 		cudaMalloc((void **)& DeviceData, TotalBytes);
+
+//		cout << "construct" << "\n";
 	}
 
 	virtual ~SharedData()
 	{
 		free(HostData);
 		cudaFree(DeviceData);
+
+//		cout << "deconstruct" << "\n";
 	}
 
 	const int TotalBytes;
@@ -29,5 +26,3 @@ public:
 	T *HostData;
 	T *DeviceData;
 };
-
-//#endif /* LAYER_H_ */
