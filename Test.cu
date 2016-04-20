@@ -33,7 +33,7 @@
 #include "SharedData.cu"
 using namespace std;
 
-void random_ints(double* a, int n);
+void randomValues(double* a, int n);
 //void initGL(int *argc, char **argv);
 
 // Total Threads
@@ -70,7 +70,7 @@ __global__ void RunPass(double* source, double* weights, double* target)
 //		output *= weights[index * N + i];
 //	}
 
-	target[index] = output;
+	target[index] = output * 2;
 //	__shared__ int temp[M + 2 * RADIUS];
 //	int gindex = threadIdx.x + blockIdx.x * blockDim.x;
 //	int lindex = threadIdx.x + RADIUS;
@@ -104,14 +104,14 @@ int main(int argc, char **argv)
 //	initGL(&argc, argv);
 	printf ("N = %d \n", N);
 
-	SharedData<double>* layer0 = new SharedData<double>(N);
-	SharedData<double>* weights = new SharedData<double>(N);
-	SharedData<double>* layer1 = new SharedData<double>(N);
+	SharedData* layer0 = new SharedData(N);
+	SharedData* weights = new SharedData(N);
+	SharedData* layer1 = new SharedData(N);
 
-    cudaDeviceSynchronize();
+//    cudaDeviceSynchronize();
 
-	random_ints(layer0->HostData, layer0->Length);
-	random_ints(weights->HostData, weights->Length);
+	randomValues(layer0->HostData, layer0->Length);
+	randomValues(weights->HostData, weights->Length);
 //	random_ints(b->HostData, N);
 
 	cout << "Generated random values\n";
@@ -180,7 +180,7 @@ int main(int argc, char **argv)
 	return 0;
 }
 
-void random_ints(double* a, int n)
+void randomValues(double* a, int n)
 {
 	int i;
 	for (i = 0; i < n; ++i)

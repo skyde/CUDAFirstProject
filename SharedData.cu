@@ -2,12 +2,16 @@
 using namespace std;
 #include "helper_cuda.h"
 
-template <class T> class SharedData
+//template <class T>
+class SharedData
 {
 public:
-	SharedData(int length) : Length(length), TotalBytes(length * sizeof(T))
+	SharedData(int length)
 	{
-		HostData = (T *) malloc(Length);
+		Length = length;
+		TotalBytes = length * sizeof(double);
+
+		HostData = (double *) malloc(TotalBytes);
 		checkCudaErrors(cudaMalloc((void **)& DeviceData, TotalBytes));
 
 		cout << "construct" << "\n";
@@ -35,9 +39,9 @@ public:
 		checkCudaErrors(cudaMemcpy(HostData, DeviceData, TotalBytes, cudaMemcpyDeviceToHost));
 	}
 
-	const int TotalBytes;
-	const int Length;
+	int TotalBytes;
+	int Length;
 
-	T *HostData;
-	T *DeviceData;
+	double *HostData;
+	double *DeviceData;
 };
