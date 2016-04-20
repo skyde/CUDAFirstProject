@@ -1,5 +1,6 @@
 #include <iostream>
 using namespace std;
+#include "helper_cuda.h"
 
 template <class T> class SharedData
 {
@@ -7,12 +8,16 @@ public:
 	SharedData(int length) : Length(length), TotalBytes(length * sizeof(T))
 	{
 		HostData = (T *) malloc(Length);
-		cudaMalloc((void **)& DeviceData, TotalBytes);
+		checkCudaErrors(cudaMalloc((void **)& DeviceData, TotalBytes));
 
 		cout << "construct" << "\n";
 	}
 
 	virtual ~SharedData()
+	{
+	}
+
+	void Dispose()
 	{
 		free(HostData);
 		cudaFree(DeviceData);
@@ -22,12 +27,12 @@ public:
 
 	void CopyToDevice()
 	{
-		cudaMemcpy(DeviceData, HostData, TotalBytes, cudaMemcpyHostToDevice);
+		checkCudaErrors(cudaMemcpy(DeviceData, HostData, TotalBytes, cudaMemcpyHostToDevice));
 	}
 
 	void CopyToHost()
 	{
-		cudaMemcpy(HostData, DeviceData, TotalBytes, cudaMemcpyDeviceToHost);
+		checkCudaErrors(cudaMemcpy(HostData, DeviceData, TotalBytes, cudaMemcpyDeviceToHost));
 	}
 
 	const int TotalBytes;

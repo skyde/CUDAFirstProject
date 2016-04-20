@@ -28,17 +28,18 @@
 
 #include <stdio.h>
 #include <iostream>
+#include "helper_cuda.h"
 
 #include "SharedData.cu"
 using namespace std;
 
-void random_ints(int* a, int n);
+void random_ints(double* a, int n);
 //void initGL(int *argc, char **argv);
 
 // Total Threads
-#define N (4096 * 8)
+#define N 16 // 4096
 // Block Size
-#define M 512
+#define M 2 // 512
 
 #define RADIUS 1
 
@@ -58,30 +59,40 @@ public:
 //	}
 //}
 
-__global__ void stencil_1d(int* in, int* out)
+__global__ void RunPass(double* source, double* weights, double* target)
 {
-	__shared__ int temp[M + 2 * RADIUS];
-	int gindex = threadIdx.x + blockIdx.x * blockDim.x;
-	int lindex = threadIdx.x + RADIUS;
+	int index = threadIdx.x + blockIdx.x * blockDim.x;
 
-	temp[lindex] = in[gindex];
+	double output = source[index];
 
-	if(threadIdx.x < RADIUS)
-	{
-		temp[lindex - RADIUS] = in[gindex - RADIUS];
-		temp[lindex + M] = in[gindex + M];
-	}
+//	for(int i = 0; i < N; i++)
+//	{
+//		output *= weights[index * N + i];
+//	}
 
-	__syncthreads();
-
-	int result = 0;
-
-	for	(int offset = -RADIUS; offset <= RADIUS; offset++)
-	{
-		result += temp[lindex + offset];
-	}
-
-	out[gindex] = result;
+	target[index] = output;
+//	__shared__ int temp[M + 2 * RADIUS];
+//	int gindex = threadIdx.x + blockIdx.x * blockDim.x;
+//	int lindex = threadIdx.x + RADIUS;
+//
+//	temp[lindex] = in[gindex];
+//
+//	if(threadIdx.x < RADIUS)
+//	{
+//		temp[lindex - RADIUS] = in[gindex - RADIUS];
+//		temp[lindex + M] = in[gindex + M];
+//	}
+//
+//	__syncthreads();
+//
+//	int result = 0;
+//
+//	for	(int offset = -RADIUS; offset <= RADIUS; offset++)
+//	{
+//		result += temp[lindex + offset];
+//	}
+//
+//	out[gindex] = result;
 }
 
 //template <class T>
@@ -93,98 +104,89 @@ int main(int argc, char **argv)
 //	initGL(&argc, argv);
 	printf ("N = %d \n", N);
 
-	SharedData<int>* a = new SharedData<int>(N);
-	SharedData<int>* b = new SharedData<int>(N);
-//	SharedData<int>* c = new SharedData<int>(N);
+	SharedData<double>* layer0 = new SharedData<double>(N);
+	SharedData<double>* weights = new SharedData<double>(N);
+	SharedData<double>* layer1 = new SharedData<double>(N);
 
-//	double *inputs;
-//	double *outputs;
+    cudaDeviceSynchronize();
 
-//	int *a, *b, *c;
-//	int *d_a, *d_b, *d_c;
-//	int size = N * sizeof(int);
-
-//	cudaMalloc((void **)&d_a, size);
-//	cudaMalloc((void **)&d_b, size);
-//	cudaMalloc((void **)&d_c, size);
-//
-//	a = (int *)malloc(size);
-//	b = (int *)malloc(size);
-//	c = (int *)malloc(size);
-
-	random_ints(a->HostData, a->Length);
+	random_ints(layer0->HostData, layer0->Length);
+	random_ints(weights->HostData, weights->Length);
 //	random_ints(b->HostData, N);
 
-	a->CopyToDevice();
+	cout << "Generated random values\n";
+
+	layer0->CopyToDevice();
+	weights->CopyToDevice();
 //	b->CopyToDevice();
+	cout << "Copy to device calls after initiated\n";
 
 //	cudaMemcpy(d_a, a, size, cudaMemcpyHostToDevice);
 //	cudaMemcpy(d_b, b, size, cudaMemcpyHostToDevice);
 
-	stencil_1d<<<((N + M - 1) / M), M>>>(a->DeviceData, b->DeviceData);
+//	dim3 threadsPerBlock(16, 16);
+//	dim3 numBlocks(N / threadsPerBlock.x, N / threadsPerBlock.y);
 
-	b->CopyToHost();
+	RunPass<<<N / M, M>>>(layer0->DeviceData, weights->DeviceData, layer1->DeviceData);
+
+	cout << "RunPass initiated\n";
+//    cudaError_t err = cudaGetLastError();
+//
+//    if (cudaSuccess != err)
+//    {
+//        fprintf(stderr, "%s(%i) : getLastCudaError() CUDA error : %s : (%d) %s.\n",
+//                file, line, "Execution on device failed", (int)err, cudaGetErrorString(err));
+//        DEVICE_RESET
+//        exit(EXIT_FAILURE);
+//    }
+
+//    cudaDeviceSynchronize();
+
+	layer1->CopyToHost();
+
+	cout << "CopyToHost initiated\n";
 //	cudaMemcpy(c, d_c, size, cudaMemcpyDeviceToHost);
 
-	for(int i = 0; i < b->Length && i < 512; i++)
+    cudaDeviceSynchronize();
+	cout << "cudaDeviceSynchronize finished\n";
+
+    getLastCudaError("Device kernel execution failed.\n");
+
+    cout << "Execution finished, will print\n";
+
+	for(int i = 0; i < layer1->Length && i < 512; i++)
 	{
-		printf ("%d = %d \n", a->HostData[i], b->HostData[i]);
+		cout << layer0->HostData[i] << " = " << layer1->HostData[i] << "\n";
 	}
 
-//	free(a);
-//	free(b);
-//	free(c);
+    cout << "print finished\n";
 
-//	cudaFree(d_a);
-//	cudaFree(d_b);
-//	cudaFree(d_c);
+	layer0->Dispose();
+	weights->Dispose();
+	layer1->Dispose();
 
-	delete a;
-	delete b;
+    cout << "dispose finished\n";
 
-    cudaDeviceReset();
+//    cudaDeviceReset();
+    cout << "cudaDeviceReset finished\n";
     exit(EXIT_SUCCESS);
+
+	delete layer0;
+	delete weights;
+	delete layer1;
+
+    cout << "will exit\n";
 
 	return 0;
 }
-//
-//void initGL(int *argc, char **argv)
-//{
-////    printf("Initializing GLUT...\n");
-////    glutInit(argc, argv);
-////
-////    glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);
-////    glutInitWindowSize(1024, 768);
-////    glutInitWindowPosition(0, 0);
-////    glutCreateWindow(argv[0]);
-////
-//////    glutDisplayFunc(displayFunc);
-//////    glutKeyboardFunc(keyboardFunc);
-//////    glutMouseFunc(clickFunc);
-//////    glutMotionFunc(motionFunc);
-//////    glutReshapeFunc(reshapeFunc);
-//////    glutTimerFunc(REFRESH_DELAY, timerEvent, 0);
-//////    initMenus();
-////
-////    printf("Loading extensions: %s\n", glewGetErrorString(glewInit()));
-////
-////    if (!glewIsSupported("GL_VERSION_1_5 GL_ARB_vertex_buffer_object GL_ARB_pixel_buffer_object"))
-////    {
-////        fprintf(stderr, "Error: failed to get minimal extensions for demo\n");
-////        fprintf(stderr, "This sample requires:\n");
-////        fprintf(stderr, "  OpenGL version 1.5\n");
-////        fprintf(stderr, "  GL_ARB_vertex_buffer_object\n");
-////        fprintf(stderr, "  GL_ARB_pixel_buffer_object\n");
-////        exit(EXIT_SUCCESS);
-////    }
-////
-////    printf("OpenGL window created.\n");
-//}
-void random_ints(int* a, int n)
+
+void random_ints(double* a, int n)
 {
 	int i;
 	for (i = 0; i < n; ++i)
 	{
-		a[i] = rand() % 4;
+		a[i] = 1.0 + (double)rand() / RAND_MAX;
+
+		cout << "random = " << a[i] << "\n";
 	}
 }
