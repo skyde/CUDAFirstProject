@@ -65,10 +65,10 @@ __global__ void RunPass(double* source, double* weights, double* target)
 
 	double output = source[index];
 
-//	for(int i = 0; i < N; i++)
-//	{
-//		output *= weights[index * N + i];
-//	}
+	for(int i = 0; i < N; i++)
+	{
+		output *= weights[index * N + i];
+	}
 
 	target[index] = output * 2;
 //	__shared__ int temp[M + 2 * RADIUS];
@@ -105,7 +105,7 @@ int main(int argc, char **argv)
 	printf ("N = %d \n", N);
 
 	SharedData* layer0 = new SharedData(N);
-	SharedData* weights = new SharedData(N);
+	SharedData* weights = new SharedData(N * N);
 	SharedData* layer1 = new SharedData(N);
 
 //    cudaDeviceSynchronize();
