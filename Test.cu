@@ -28,10 +28,12 @@
 
 #include <stdio.h>
 #include <iostream>
+
+#include "SharedData.cu"
 using namespace std;
 
 void random_ints(int* a, int n);
-void initGL(int *argc, char **argv);
+//void initGL(int *argc, char **argv);
 
 // Total Threads
 #define N (2048 * 2048)
@@ -39,6 +41,12 @@ void initGL(int *argc, char **argv);
 #define M 512
 
 #define RADIUS 1
+
+class Layer
+{
+public:
+
+};
 
 //__global__ void add(int *a, int *b, int *c, int n)
 //{
@@ -76,10 +84,18 @@ __global__ void stencil_1d(int* in, int* out)
 	out[gindex] = result;
 }
 
+//template <class T>
+//class Stack {
+//};
 
 int main(int argc, char **argv)
 {
 //	initGL(&argc, argv);
+
+	SharedData<double>* test = new SharedData<double>(12);
+
+//	double *inputs;
+//	double *outputs;
 
 	int *a, *b, *c;
 	int *d_a, *d_b, *d_c;

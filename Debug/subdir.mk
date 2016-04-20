@@ -4,12 +4,15 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CU_SRCS += \
+../SharedData.cu \
 ../Test.cu 
 
 OBJS += \
+./SharedData.o \
 ./Test.o 
 
 CU_DEPS += \
+./SharedData.d \
 ./Test.d 
 
 
