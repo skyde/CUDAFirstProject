@@ -9,7 +9,7 @@ public:
 		HostData = (T *) malloc(Length);
 		cudaMalloc((void **)& DeviceData, TotalBytes);
 
-//		cout << "construct" << "\n";
+		cout << "construct" << "\n";
 	}
 
 	virtual ~SharedData()
@@ -17,7 +17,17 @@ public:
 		free(HostData);
 		cudaFree(DeviceData);
 
-//		cout << "deconstruct" << "\n";
+		cout << "deconstruct" << "\n";
+	}
+
+	void CopyToDevice()
+	{
+		cudaMemcpy(DeviceData, HostData, TotalBytes, cudaMemcpyHostToDevice);
+	}
+
+	void CopyToHost()
+	{
+		cudaMemcpy(HostData, DeviceData, TotalBytes, cudaMemcpyDeviceToHost);
 	}
 
 	const int TotalBytes;

@@ -36,7 +36,7 @@ void random_ints(int* a, int n);
 //void initGL(int *argc, char **argv);
 
 // Total Threads
-#define N (2048 * 2048)
+#define N (4096 * 8)
 // Block Size
 #define M 512
 
@@ -91,48 +91,59 @@ __global__ void stencil_1d(int* in, int* out)
 int main(int argc, char **argv)
 {
 //	initGL(&argc, argv);
+	printf ("N = %d \n", N);
 
-	SharedData<double>* test = new SharedData<double>(N);
+	SharedData<int>* a = new SharedData<int>(N);
+	SharedData<int>* b = new SharedData<int>(N);
+//	SharedData<int>* c = new SharedData<int>(N);
 
 //	double *inputs;
 //	double *outputs;
 
-	int *a, *b, *c;
-	int *d_a, *d_b, *d_c;
-	int size = N * sizeof(int);
+//	int *a, *b, *c;
+//	int *d_a, *d_b, *d_c;
+//	int size = N * sizeof(int);
 
-	cudaMalloc((void **)&d_a, size);
-	cudaMalloc((void **)&d_b, size);
-	cudaMalloc((void **)&d_c, size);
+//	cudaMalloc((void **)&d_a, size);
+//	cudaMalloc((void **)&d_b, size);
+//	cudaMalloc((void **)&d_c, size);
+//
+//	a = (int *)malloc(size);
+//	b = (int *)malloc(size);
+//	c = (int *)malloc(size);
 
-	a = (int *)malloc(size);
-	b = (int *)malloc(size);
-	c = (int *)malloc(size);
+	random_ints(a->HostData, a->Length);
+//	random_ints(b->HostData, N);
 
-	random_ints(a, N);
-	random_ints(b, N);
+	a->CopyToDevice();
+//	b->CopyToDevice();
 
-	cudaMemcpy(d_a, a, size, cudaMemcpyHostToDevice);
-	cudaMemcpy(d_b, b, size, cudaMemcpyHostToDevice);
+//	cudaMemcpy(d_a, a, size, cudaMemcpyHostToDevice);
+//	cudaMemcpy(d_b, b, size, cudaMemcpyHostToDevice);
 
-	stencil_1d<<<((N + M - 1) / M), M>>>(d_a, d_c);
+	stencil_1d<<<((N + M - 1) / M), M>>>(a->DeviceData, b->DeviceData);
 
-	cudaMemcpy(c, d_c, size, cudaMemcpyDeviceToHost);
+	b->CopyToHost();
+//	cudaMemcpy(c, d_c, size, cudaMemcpyDeviceToHost);
 
-	for(int i = 0; i < N && i < 512; i++)
+	for(int i = 0; i < b->Length && i < 512; i++)
 	{
-		printf ("%d = %d \n", a[i], c[i]);
+		printf ("%d = %d \n", a->HostData[i], b->HostData[i]);
 	}
 
-	free(a);
-	free(b);
-	free(c);
+//	free(a);
+//	free(b);
+//	free(c);
 
-	cudaFree(d_a);
-	cudaFree(d_b);
-	cudaFree(d_c);
+//	cudaFree(d_a);
+//	cudaFree(d_b);
+//	cudaFree(d_c);
 
-	delete test;
+	delete a;
+	delete b;
+
+    cudaDeviceReset();
+    exit(EXIT_SUCCESS);
 
 	return 0;
 }
