@@ -104,10 +104,11 @@ int main(int argc, char **argv)
 	printf ("N = %d \n", N);
 
 	SharedData<Node>* layer0 = new SharedData<Node>(N);
-	SharedData<Element>* weights = new SharedData<Element>(N * N);
+	SharedData<Element>* weight0to1 = new SharedData<Element>(N * N);
 	SharedData<Node>* layer1 = new SharedData<Node>(N);
 
 	SharedData<Node>* layers [2] = { layer0, layer1 };
+	SharedData<Element>* weights [1] = { weight0to1 };
 
 //	randomValues(layer0->HostData, layer0->Length);
 //	randomValues(weights->HostData, weights->Length);
@@ -115,47 +116,37 @@ int main(int argc, char **argv)
 	layer0->HostData[0].Self.Value = 1;
 	layer0->HostData[1].Self.Value = 2;
 
+	layer1->HostData[0].Self.Value = 10;
+	layer1->HostData[1].Self.Value = 20;
+
 //	layer1->HostData[0].Self.Value = 10;
 //	layer1->HostData[1].Self.Value = 20;
 //	layer1->HostData[0].Self.Derivative = 0;
 //	layer1->HostData[1].Self.Derivative = 0;
 
-	weights->HostData[0].Value = 1;
-	weights->HostData[1].Value = 0.5;
-	weights->HostData[2].Value = 0;
-	weights->HostData[3].Value = 1;
-
-    int height = N;
-
-	for(int y = 0; y < height; y++)
-	{
-		for(int x = 0; x < layers[y]->Length; x++)
-		{
-			layers[x]->HostData[y].Print();
-		}
-
-		cout << "\n";
-	}
-
+	weight0to1->HostData[0].Value = 1;
+	weight0to1->HostData[1].Value = 0.5;
+	weight0to1->HostData[2].Value = 0;
+	weight0to1->HostData[3].Value = 1;
 
 	cout << "Generated random values\n";
 
 	layer0->CopyToDevice();
-	weights->CopyToDevice();
+	weight0to1->CopyToDevice();
 	layer1->CopyToDevice();
 
 	cout << "Copy to device calls after initiated\n";
 
 	ForwardPass<<<N / M, M>>>(
 			layer0->DeviceData,
-			weights->DeviceData,
+			weight0to1->DeviceData,
 			layer1->DeviceData);
 
     cudaDeviceSynchronize();
 
 	BackwardPass<<<N / M, M>>>(
 			layer0->DeviceData,
-			weights->DeviceData,
+			weight0to1->DeviceData,
 			layer1->DeviceData);
 
 	cout << "RunPass initiated\n";
@@ -171,6 +162,33 @@ int main(int argc, char **argv)
     getLastCudaError("Device kernel execution failed.\n");
 
     cout << "Execution finished, will print\n";
+
+    int numLayers = 2;
+    int nodesPerLayer = N;
+
+	for(int y = 0; y < nodesPerLayer; y++)
+	{
+		for(int x = 0; x < numLayers; x++)
+		{
+			layers[x]->HostData[y].Print();
+
+			int nextLayer = x + 1;
+			if(nextLayer < numLayers)
+			{
+				int block = layers[nextLayer]->Length;
+				for(int w = 0; w < block; w++)
+				{
+					int index = y * block + w;
+
+					cout << y << "->" << w;
+
+					weights[x]->HostData[index].Print();
+				}
+			}
+		}
+
+		cout << "\n";
+	}
 
 //	for(int i = 0; i < layer0->Length && i < 512; i++)
 //	{
@@ -193,7 +211,7 @@ int main(int argc, char **argv)
 //	rightBiases->Dispose();
 
 	delete layer0;
-	delete weights;
+	delete weight0to1;
 	delete layer1;
 
     cout << "dispose finished\n";
