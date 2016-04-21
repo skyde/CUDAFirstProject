@@ -106,9 +106,9 @@ int main(int argc, char **argv)
 {
 	printf ("N = %d \n", N);
 
-	SharedData<Node>* layer0 = new SharedData<Node>(N);
-	SharedData<Element>* weight0to1 = new SharedData<Element>(N * N);
-	SharedData<Node>* layer1 = new SharedData<Node>(N);
+//	SharedData<Node>* layer0 = new SharedData<Node>(N);
+//	SharedData<Element>* weight0to1 = new SharedData<Element>(N * N);
+//	SharedData<Node>* layer1 = new SharedData<Node>(N);
 
 	array<SharedData<Node>*, LAYERS> layers;
 	array<SharedData<Element>*, LAYERS - 1> weights;
@@ -129,49 +129,40 @@ int main(int argc, char **argv)
 		}
 	}
 
-//	randomValues(layer0->HostData, layer0->Length);
-//	randomValues(weights->HostData, weights->Length);
-//	randomValues(layer1->HostData, layer1->Length);
+	layers[0]->HostData[0].Self.Value = 1;
+	layers[0]->HostData[1].Self.Value = 2;
 
-	layer0->HostData[0].Self.Value = 1;
-	layer0->HostData[1].Self.Value = 2;
+	layers[1]->HostData[0].Self.Value = 10;
+	layers[1]->HostData[1].Self.Value = 20;
 
-	layer1->HostData[0].Self.Value = 10;
-	layer1->HostData[1].Self.Value = 20;
-
-//	layer1->HostData[0].Self.Value = 10;
-//	layer1->HostData[1].Self.Value = 20;
-//	layer1->HostData[0].Self.Derivative = 0;
-//	layer1->HostData[1].Self.Derivative = 0;
-
-	weight0to1->HostData[0].Value = 1;
-	weight0to1->HostData[1].Value = 0.5;
-	weight0to1->HostData[2].Value = 0;
-	weight0to1->HostData[3].Value = 1;
+	weights[0]->HostData[0].Value = 1;
+	weights[0]->HostData[1].Value = 0.5;
+	weights[0]->HostData[2].Value = 0;
+	weights[0]->HostData[3].Value = 1;
 
 	cout << "Generated random values\n";
 
-	layer0->CopyToDevice();
-	weight0to1->CopyToDevice();
-	layer1->CopyToDevice();
+	layers[0]->CopyToDevice();
+	weights[0]->CopyToDevice();
+	layers[1]->CopyToDevice();
 
 	cout << "Copy to device calls after initiated\n";
 
 	ForwardPass<<<N / M, M>>>(
-			layer0->DeviceData,
-			weight0to1->DeviceData,
-			layer1->DeviceData);
+			layers[0]->DeviceData,
+			weights[0]->DeviceData,
+			layers[1]->DeviceData);
 
     cudaDeviceSynchronize();
 
 	BackwardPass<<<N / M, M>>>(
-			layer0->DeviceData,
-			weight0to1->DeviceData,
-			layer1->DeviceData);
+			layers[0]->DeviceData,
+			weights[0]->DeviceData,
+			layers[1]->DeviceData);
 
 	cout << "RunPass initiated\n";
 
-	layer1->CopyToHost();
+	layers[1]->CopyToHost();
 
 	cout << "CopyToHost initiated\n";
 
@@ -233,9 +224,19 @@ int main(int argc, char **argv)
 //	rightValues->Dispose();
 //	rightBiases->Dispose();
 
-	delete layer0;
-	delete weight0to1;
-	delete layer1;
+	for(int i = 0; i < layers.size(); i++)
+	{
+		delete layers[i];
+	}
+
+	for(int i = 0; i < weights.size(); i++)
+	{
+		delete weights[i];
+	}
+
+//	delete layers[1];
+//	delete weight0to1;
+//	delete layer1;
 
     cout << "dispose finished\n";
 
