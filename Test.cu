@@ -38,7 +38,7 @@ struct __align__(sizeof(double) * 2) Element
 	public:
 	void Print()
 	{
-		cout << " [" << Value << " " << Derivative << "] ";
+		cout << "[" << Value << " " << Derivative << "]";
 	}
 };
 
@@ -57,7 +57,7 @@ struct __align__(sizeof(Element) * 2) Node
 	public:
 	void Print()
 	{
-		cout << " (" << Self.Value << " " << Self.Derivative << ") ";
+		cout << "(" << Self.Value << " " << Self.Derivative << ")";
 	}
 };
 
@@ -70,16 +70,16 @@ __global__ void ForwardPass(
 		Element* weights, // left to right
 		Node* right)
 {
-//	int index = threadIdx.x + blockIdx.x * blockDim.x;
-//
-//	double output = left[index].Self.Value;
-//
-//	for(int i = 0; i < N; i++)
-//	{
-//		output *= weights[index * N + i].Value;
-//	}
-//
-//	right[index].Self.Value = tanh(output + right[index].Bias.Value);
+	int index = threadIdx.x + blockIdx.x * blockDim.x;
+
+	double output = left[index].Self.Value;
+
+	for(int i = 0; i < N; i++)
+	{
+		output *= weights[index * N + i].Value;
+	}
+
+	right[index].Self.Value = tanh(output + right[index].Bias.Value);
 }
 
 __global__ void BackwardPass(
@@ -171,6 +171,7 @@ int main(int argc, char **argv)
 		for(int x = 0; x < numLayers; x++)
 		{
 			layers[x]->HostData[y].Print();
+			cout << " ";
 
 			int nextLayer = x + 1;
 			if(nextLayer < numLayers)
@@ -183,6 +184,8 @@ int main(int argc, char **argv)
 					cout << y << "->" << w;
 
 					weights[x]->HostData[index].Print();
+
+					cout << " ";
 				}
 			}
 		}
