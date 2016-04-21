@@ -13,7 +13,7 @@ public:
 
 	}
 
-	NeuralNetwork ~Layer()
+	virtual ~NeuralNetwork()
 	{
 	}
 
