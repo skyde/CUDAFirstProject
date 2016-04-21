@@ -10,8 +10,6 @@
 #include "Node.cu"
 using namespace std;
 
-//void initGL(int *argc, char **argv);
-
 // Total Threads
 #define N 2 // Nodes per layer
 // Block Size
@@ -20,19 +18,6 @@ using namespace std;
 #define LAYERS 2
 
 #define PRINT_DERIVATIVE true
-
-//#define RADIUS 1
-
-
-//__global__ void add(int *a, int *b, int *c, int n)
-//{
-//	int index = threadIdx.x + blockIdx.x * blockDim.x;
-//
-//	if(index < n)
-//	{
-//		c[index] = a[index] + b[index];
-//	}
-//}
 
 void randomValues(double* a, int n);
 void randomValues(Node* a, int n);
@@ -147,7 +132,6 @@ int main(int argc, char **argv)
 			weights[0]->DeviceData,
 			layers[1]->DeviceData,
 			layers[1]->Length);
-
 
 	BackwardPass<<<N / M, M>>>(
 			layers[0]->DeviceData,

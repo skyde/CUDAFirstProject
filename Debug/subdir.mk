@@ -6,23 +6,26 @@
 CU_SRCS += \
 ../Element.cu \
 ../Layer.cu \
+../Main.cu \
+../NeuralNetwork.cu \
 ../Node.cu \
-../SharedData.cu \
-../Test.cu 
+../SharedData.cu 
 
 OBJS += \
 ./Element.o \
 ./Layer.o \
+./Main.o \
+./NeuralNetwork.o \
 ./Node.o \
-./SharedData.o \
-./Test.o 
+./SharedData.o 
 
 CU_DEPS += \
 ./Element.d \
 ./Layer.d \
+./Main.d \
+./NeuralNetwork.d \
 ./Node.d \
-./SharedData.d \
-./Test.d 
+./SharedData.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
