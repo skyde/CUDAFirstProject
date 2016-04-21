@@ -19,15 +19,15 @@ public:
 
 	virtual ~SharedData()
 	{
-	}
-
-	void Dispose()
-	{
 		free(HostData);
 		cudaFree(DeviceData);
 
 		cout << "deconstruct" << "\n";
 	}
+
+//	void Dispose()
+//	{
+//	}
 
 	void CopyToDevice()
 	{

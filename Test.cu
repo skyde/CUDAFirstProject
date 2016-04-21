@@ -169,21 +169,21 @@ int main(int argc, char **argv)
 
     cout << "print finished\n";
 
-	leftValues->Dispose();
-	weights->Dispose();
-	rightValues->Dispose();
-	rightBiases->Dispose();
+//	leftValues->Dispose();
+//	weights->Dispose();
+//	rightValues->Dispose();
+//	rightBiases->Dispose();
+
+	delete leftValues;
+	delete weights;
+	delete rightValues;
+	delete rightBiases;
 
     cout << "dispose finished\n";
 
     cudaDeviceReset();
 
     cout << "cudaDeviceReset finished\n";
-
-	delete leftValues;
-	delete weights;
-	delete rightValues;
-	delete rightBiases;
 
     cout << "will exit\n";
 

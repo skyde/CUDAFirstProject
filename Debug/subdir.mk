@@ -4,14 +4,17 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CU_SRCS += \
+../Layer.cu \
 ../SharedData.cu \
 ../Test.cu 
 
 OBJS += \
+./Layer.o \
 ./SharedData.o \
 ./Test.o 
 
 CU_DEPS += \
+./Layer.d \
 ./SharedData.d \
 ./Test.d 
 
