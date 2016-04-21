@@ -1,36 +1,9 @@
-
-//#include "GL/glut.h"
-// OpenGL Graphics includes
-//#include <GL/glew.h>
-//#if defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64)
-//#include <GL/wglew.h>
-//#endif
-//#if defined(__APPLE__) || defined(__MACOSX)
-//  #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-//  #include <GLUT/glut.h>
-//  #ifndef glutCloseFunc
-//  #define glutCloseFunc glutWMCloseFunc
-//  #endif
-//#else
-//#include <GL/freeglut.h>
-//#endif
-//
-//// CUDA runtime
-//// CUDA utilities and system includes
-//#include <cuda_runtime.h>
-//#include <cuda_gl_interop.h>
-//
-//#include <helper_functions.h>
-//#include <helper_cuda.h>
-//#include <helper_cuda_gl.h>
-//#include <rendercheck_gl.h>
-
-
 #include <stdio.h>
 #include <iostream>
 #include "helper_cuda.h"
 
 #include "SharedData.cu"
+#include "Layer.cu"
 using namespace std;
 
 void randomValues(double* a, int n);
@@ -43,11 +16,6 @@ void randomValues(double* a, int n);
 
 #define RADIUS 1
 
-class Layer
-{
-public:
-
-};
 
 //__global__ void add(int *a, int *b, int *c, int n)
 //{
@@ -118,6 +86,8 @@ __global__ void BackwardPass(
 int main(int argc, char **argv)
 {
 	printf ("N = %d \n", N);
+
+	Layer* layer0 = new Layer(N);
 
 	SharedData<double>* leftValues = new SharedData<double>(N);
 	SharedData<double>* weights = new SharedData<double>(N * N);

@@ -247,4 +247,5 @@
     /Volumes/Xcode/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../include/c++/v1/bitset \
     /Volumes/Xcode/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../include/c++/v1/__bit_reference \
     ../helper_cuda.h \
-    ../SharedData.cu
+    ../SharedData.cu \
+    ../Layer.cu
