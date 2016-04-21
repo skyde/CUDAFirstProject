@@ -119,10 +119,10 @@ int main(int argc, char **argv)
 {
 	printf ("N = %d \n", N);
 
-	SharedData* leftValues = new SharedData(N);
-	SharedData* weights = new SharedData(N * N);
-	SharedData* rightValues = new SharedData(N);
-	SharedData* rightBiases = new SharedData(N);
+	SharedData<double>* leftValues = new SharedData<double>(N);
+	SharedData<double>* weights = new SharedData<double>(N * N);
+	SharedData<double>* rightValues = new SharedData<double>(N);
+	SharedData<double>* rightBiases = new SharedData<double>(N);
 
 	randomValues(leftValues->HostData, leftValues->Length);
 	randomValues(weights->HostData, weights->Length);

@@ -2,14 +2,14 @@
 using namespace std;
 #include "helper_cuda.h"
 
-//template <class T>
+template <class T>
 class SharedData
 {
 public:
 	SharedData(int length)
 	{
 		Length = length;
-		TotalBytes = length * sizeof(double);
+		TotalBytes = length * sizeof(T);
 
 		HostData = (double *) malloc(TotalBytes);
 		checkCudaErrors(cudaMalloc((void **)& DeviceData, TotalBytes));
@@ -42,6 +42,6 @@ public:
 	int TotalBytes;
 	int Length;
 
-	double *HostData;
-	double *DeviceData;
+	T *HostData;
+	T *DeviceData;
 };
