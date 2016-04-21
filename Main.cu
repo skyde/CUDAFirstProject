@@ -26,25 +26,22 @@ void randomValues(Element* a, int n);
 __global__ void ForwardPass(
 		Node* left,
 		int leftLength,
-		Element* weights, // left to right
+		Element* weights,
 		Node* right,
 		int rightLength)
 {
 	int index = threadIdx.x + blockIdx.x * blockDim.x;
 
-	double value = 0;//left[index].Self.Value;
+	double value = 0;
 
 	for(int i = 0; i < leftLength; i++)
 	{
 		int w = index + i * rightLength;
 
 		value += left[i].Self.Value * weights[w].Value;
-
-//		weights[w].Derivative = -9;
 	}
 
 	right[index].Self.Value = value;
-//	right[index].Self.Derivative = -7;// + right[index].Bias.Value
 }
 
 __global__ void BackwardPass(
@@ -56,8 +53,6 @@ __global__ void BackwardPass(
 {
 	int index = threadIdx.x + blockIdx.x * blockDim.x;
 
-//	double rightDerivative = right[index].Self.Derivative;
-
 	double total = 0;
 
 	for(int i = 0; i < rightLength; i++)
@@ -67,23 +62,9 @@ __global__ void BackwardPass(
 		weights[w].Derivative = weights[w].Value * right[i].Self.Derivative;
 
 		total += weights[w].Derivative;
-//		value += left[i].Self.Value * weights[w].Value;
 	}
 
 	left[index].Self.Derivative = total;
-
-//	__syncthreads();
-
-//	int index = threadIdx.x + blockIdx.x * blockDim.x;
-//
-//	double output = left[index].Self.Value;
-//
-//	for(int i = 0; i < N; i++)
-//	{
-//		output *= weights[index * N + i].Value;
-//	}
-//
-//	right[index].Self.Value = tanh(output + right[index].Bias.Value);
 }
 
 int main(int argc, char **argv)
