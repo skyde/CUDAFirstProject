@@ -139,7 +139,7 @@ int main(int argc, char **argv)
 	}
 
 	layers[0]->HostData[0].Self.Value = 1;
-	layers[0]->HostData[1].Self.Value = 10;
+	layers[0]->HostData[1].Self.Value = 2;
 
 //	layers[1]->HostData[0].Self.Value = 10;
 //	layers[1]->HostData[1].Self.Value = 20;
