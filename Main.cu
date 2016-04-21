@@ -48,6 +48,14 @@ __global__ void BackwardPass(
 	left[index].Self.Derivative = total;
 }
 
+__global__ void IterateDerivativePass(Element* weights)
+{
+	int index = threadIdx.x + blockIdx.x * blockDim.x;
+
+	weights[index].Value += weights[index].Derivative;
+//	left[index].Self.Derivative = total;
+}
+
 void Forward(NeuralNetwork* n)
 {
 	ForwardPass<<<N / M, M>>>(
@@ -57,6 +65,7 @@ void Forward(NeuralNetwork* n)
 			n->Layers[1]->DeviceData,
 			n->Layers[1]->Length);
 }
+
 void Backward(NeuralNetwork* n)
 {
 	BackwardPass<<<N / M, M>>>(
@@ -65,6 +74,13 @@ void Backward(NeuralNetwork* n)
 			n->Weights[0]->DeviceData,
 			n->Layers[1]->DeviceData,
 			n->Layers[1]->Length);
+}
+
+void IterateDerivative(NeuralNetwork* n)
+{
+	int length = n->Weights[0]->Length;
+	IterateDerivativePass<<<length / M, M>>>(
+			n->Weights[0]->DeviceData);
 }
 
 int main(int argc, char **argv)
@@ -94,6 +110,7 @@ int main(int argc, char **argv)
 
 		Forward(n);
 		Backward(n);
+		IterateDerivative(n);
 
 		n->CopyToHost();
 
