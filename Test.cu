@@ -9,7 +9,7 @@ using namespace std;
 //void initGL(int *argc, char **argv);
 
 // Total Threads
-#define N 16 // 4096
+#define N 2 // 4096
 // Block Size
 #define M 2 // 512
 
@@ -57,46 +57,6 @@ __global__ void ForwardPass(
 	right[index].Self.Value = tanh(output + right[index].Bias.Value);
 }
 
-//__global__ void BackwardPass(
-//		double* leftValues,
-//		double* leftValuesDerivatives,
-//		double* leftBiases,
-//		double* leftBiasesDerivatives,
-//		double* weights,
-//		double* weightsDerivatives,
-//		double* rightValues,
-//		double* rightValuesDerivatives,
-//		double* rightBiasesDerivatives)
-//{
-////	int index = threadIdx.x + blockIdx.x * blockDim.x;
-////
-////	double output = leftValues[index];
-////
-////	for(int i = 0; i < N; i++)
-////	{
-////		output *= weights[index * N + i];
-////	}
-////
-////	rightValues[index] = tanh(output + rightBiases[index]);
-//}
-//__global__ void BackwardPass(
-//		double* left,
-//		double* weights, // left to right
-//		double* right,
-//		double* biases)
-//{
-//	int index = threadIdx.x + blockIdx.x * blockDim.x;
-//
-//	double output = left[index];
-//
-//	for(int i = 0; i < N; i++)
-//	{
-//		output *= weights[index * N + i];
-//	}
-//
-//	right[index] = tanh(output + biases[index]);
-//}
-
 int main(int argc, char **argv)
 {
 	printf ("N = %d \n", N);
@@ -104,11 +64,6 @@ int main(int argc, char **argv)
 	SharedData<Node>* layer0 = new SharedData<Node>(N);
 	SharedData<Element>* weights = new SharedData<Element>(N * N);
 	SharedData<Node>* layer1 = new SharedData<Node>(N);
-
-//	SharedData<double>* leftValues = new SharedData<double>(N);
-//	SharedData<double>* weights = new SharedData<double>(N * N);
-//	SharedData<double>* rightValues = new SharedData<double>(N);
-//	SharedData<double>* rightBiases = new SharedData<double>(N);
 
 	randomValues(layer0->HostData, layer0->Length);
 	randomValues(weights->HostData, weights->Length);
@@ -121,12 +76,6 @@ int main(int argc, char **argv)
 	layer1->CopyToDevice();
 
 	cout << "Copy to device calls after initiated\n";
-
-//	cudaMemcpy(d_a, a, size, cudaMemcpyHostToDevice);
-//	cudaMemcpy(d_b, b, size, cudaMemcpyHostToDevice);
-
-//	dim3 threadsPerBlock(16, 16);
-//	dim3 numBlocks(N / threadsPerBlock.x, N / threadsPerBlock.y);
 
 	ForwardPass<<<N / M, M>>>(
 			layer0->DeviceData,
@@ -149,7 +98,15 @@ int main(int argc, char **argv)
 
 	for(int i = 0; i < layer0->Length && i < 512; i++)
 	{
-		cout << layer0->HostData[i].Self.Value << " = " << layer1->HostData[i].Self.Value << "\n";
+		cout << "Node.Self " << layer0->HostData[i].Self.Value << " Derivative " << layer0->HostData[i].Self.Derivative << "\n";
+		cout << "Node.Bias " << layer0->HostData[i].Bias.Value << " Derivative " << layer0->HostData[i].Bias.Derivative << "\n";
+
+		for(int x = 0; x < layer1->Length; x++)
+		{
+			int w = i * layer1->Length + x;
+
+			cout << "Weight.Self " << weights->HostData[w].Value << " Derivative " << weights->HostData[w].Derivative << "\n";
+		}
 	}
 
     cout << "print finished\n";
