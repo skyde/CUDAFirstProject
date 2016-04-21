@@ -113,7 +113,9 @@ __global__ void BackwardPass(
 {
 	int index = threadIdx.x + blockIdx.x * blockDim.x;
 
-	double nodeDerivative = right[index].Self.Derivative;
+//	double rightDerivative = right[index].Self.Derivative;
+
+	double total = 0;
 
 	for(int i = 0; i < rightLength; i++)
 	{
@@ -121,8 +123,13 @@ __global__ void BackwardPass(
 
 		weights[w].Derivative = weights[w].Value * right[i].Self.Derivative;
 
+		total += weights[w].Derivative;
 //		value += left[i].Self.Value * weights[w].Value;
 	}
+
+	left[index].Self.Derivative = total;
+
+//	__syncthreads();
 
 //	int index = threadIdx.x + blockIdx.x * blockDim.x;
 //
