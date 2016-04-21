@@ -74,8 +74,8 @@ int main(int argc, char **argv)
 	n->Layers[0]->HostData[0].Self.Value = 1;
 	n->Layers[0]->HostData[1].Self.Value = 2;
 
-	n->Layers[1]->HostData[0].Self.Derivative = 1;
-	n->Layers[1]->HostData[1].Self.Derivative = 0.1;
+	n->Layers[1]->HostData[0].Self.Derivative = 0.01;
+	n->Layers[1]->HostData[1].Self.Derivative = 0.001;
 
 	n->Weights[0]->HostData[0].Value = 1;
 	n->Weights[0]->HostData[1].Value = 0.5;
@@ -84,27 +84,38 @@ int main(int argc, char **argv)
 
 	n->CopyToDevice();
 
-	cout << "Copy to device calls after initiated\n";
+//	cout << "Copy to device calls after initiated\n";
 
-	Forward(n);
-	Backward(n);
+	for(int i = 0; i < 10; ++i)
+	{
+		cout << "\n";
+		cout << "Epoch " << i;
+		cout << "\n";
 
-	cout << "RunPass initiated\n";
+		Forward(n);
+		Backward(n);
 
-	n->CopyToHost();
+		n->CopyToHost();
 
-	cout << "CopyToHost initiated\n";
+	    cudaDeviceSynchronize();
 
-    cudaDeviceSynchronize();
+	    n->Print();
+	}
 
-	cout << "cudaDeviceSynchronize finished\n";
+//	cout << "RunPass initiated\n";
 
-    getLastCudaError("Device kernel execution failed.\n");
 
-    cout << "Execution finished, will print\n";
+//	cout << "CopyToHost initiated\n";
 
-    n->Print();
-    cout << "print finished\n";
+//    cudaDeviceSynchronize();
+
+//	cout << "cudaDeviceSynchronize finished\n";
+
+//    getLastCudaError("Device kernel execution failed.\n");
+
+//    cout << "Execution finished, will print\n";
+
+//    cout << "print finished\n";
 
     delete n;
 
