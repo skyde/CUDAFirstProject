@@ -11,7 +11,7 @@ using namespace std;
 // Total Threads
 #define N 2 // 4096
 // Block Size
-#define M 2 // 512
+#define M 1 // 512
 
 #define RADIUS 1
 
@@ -28,12 +28,37 @@ using namespace std;
 
 struct __align__(sizeof(double) * 2) Element
 {
+	Element() : Value(0), Derivative(0)
+	{
+		cout << "Element ctor";
+	}
+
     double Value, Derivative;
+
+	public:
+	void Print()
+	{
+		cout << " [" << Value << " " << Derivative << "] ";
+	}
 };
 
 struct __align__(sizeof(Element) * 2) Node
 {
+	Node() : Self(), Bias()
+	{
+		cout << "Node ctor";
+	}
+//	{
+//		Self = new Element();
+//	}
+
 	Element Self, Bias;
+
+	public:
+	void Print()
+	{
+		cout << " (" << Self.Value << " " << Self.Derivative << ") ";
+	}
 };
 
 void randomValues(double* a, int n);
@@ -45,16 +70,33 @@ __global__ void ForwardPass(
 		Element* weights, // left to right
 		Node* right)
 {
-	int index = threadIdx.x + blockIdx.x * blockDim.x;
+//	int index = threadIdx.x + blockIdx.x * blockDim.x;
+//
+//	double output = left[index].Self.Value;
+//
+//	for(int i = 0; i < N; i++)
+//	{
+//		output *= weights[index * N + i].Value;
+//	}
+//
+//	right[index].Self.Value = tanh(output + right[index].Bias.Value);
+}
 
-	double output = left[index].Self.Value;
-
-	for(int i = 0; i < N; i++)
-	{
-		output *= weights[index * N + i].Value;
-	}
-
-	right[index].Self.Value = tanh(output + right[index].Bias.Value);
+__global__ void BackwardPass(
+		Node* left,
+		Element* weights,
+		Node* right)
+{
+//	int index = threadIdx.x + blockIdx.x * blockDim.x;
+//
+//	double output = left[index].Self.Value;
+//
+//	for(int i = 0; i < N; i++)
+//	{
+//		output *= weights[index * N + i].Value;
+//	}
+//
+//	right[index].Self.Value = tanh(output + right[index].Bias.Value);
 }
 
 int main(int argc, char **argv)
@@ -65,9 +107,36 @@ int main(int argc, char **argv)
 	SharedData<Element>* weights = new SharedData<Element>(N * N);
 	SharedData<Node>* layer1 = new SharedData<Node>(N);
 
-	randomValues(layer0->HostData, layer0->Length);
-	randomValues(weights->HostData, weights->Length);
-	randomValues(layer1->HostData, layer1->Length);
+	SharedData<Node>* layers [2] = { layer0, layer1 };
+
+//	randomValues(layer0->HostData, layer0->Length);
+//	randomValues(weights->HostData, weights->Length);
+//	randomValues(layer1->HostData, layer1->Length);
+	layer0->HostData[0].Self.Value = 1;
+	layer0->HostData[1].Self.Value = 2;
+
+//	layer1->HostData[0].Self.Value = 10;
+//	layer1->HostData[1].Self.Value = 20;
+//	layer1->HostData[0].Self.Derivative = 0;
+//	layer1->HostData[1].Self.Derivative = 0;
+
+	weights->HostData[0].Value = 1;
+	weights->HostData[1].Value = 0.5;
+	weights->HostData[2].Value = 0;
+	weights->HostData[3].Value = 1;
+
+    int height = N;
+
+	for(int y = 0; y < height; y++)
+	{
+		for(int x = 0; x < layers[y]->Length; x++)
+		{
+			layers[x]->HostData[y].Print();
+		}
+
+		cout << "\n";
+	}
+
 
 	cout << "Generated random values\n";
 
@@ -78,6 +147,13 @@ int main(int argc, char **argv)
 	cout << "Copy to device calls after initiated\n";
 
 	ForwardPass<<<N / M, M>>>(
+			layer0->DeviceData,
+			weights->DeviceData,
+			layer1->DeviceData);
+
+    cudaDeviceSynchronize();
+
+	BackwardPass<<<N / M, M>>>(
 			layer0->DeviceData,
 			weights->DeviceData,
 			layer1->DeviceData);
@@ -96,18 +172,18 @@ int main(int argc, char **argv)
 
     cout << "Execution finished, will print\n";
 
-	for(int i = 0; i < layer0->Length && i < 512; i++)
-	{
-		cout << "Node.Self " << layer0->HostData[i].Self.Value << " Derivative " << layer0->HostData[i].Self.Derivative << "\n";
-		cout << "Node.Bias " << layer0->HostData[i].Bias.Value << " Derivative " << layer0->HostData[i].Bias.Derivative << "\n";
-
-		for(int x = 0; x < layer1->Length; x++)
-		{
-			int w = i * layer1->Length + x;
-
-			cout << "Weight.Self " << weights->HostData[w].Value << " Derivative " << weights->HostData[w].Derivative << "\n";
-		}
-	}
+//	for(int i = 0; i < layer0->Length && i < 512; i++)
+//	{
+//		cout << "Node.Self " << layer0->HostData[i].Self.Value << " Derivative " << layer0->HostData[i].Self.Derivative << "\n";
+//		cout << "Node.Bias " << layer0->HostData[i].Bias.Value << " Derivative " << layer0->HostData[i].Bias.Derivative << "\n";
+//
+//		for(int x = 0; x < layer1->Length; x++)
+//		{
+//			int w = i * layer1->Length + x;
+//
+//			cout << "Weight.Self " << weights->HostData[w].Value << " Derivative " << weights->HostData[w].Derivative << "\n";
+//		}
+//	}
 
     cout << "print finished\n";
 

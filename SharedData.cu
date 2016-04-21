@@ -13,8 +13,13 @@ public:
 		Length = length;
 		TotalBytes = length * sizeof(T);
 
-		HostData = (T *) malloc(TotalBytes);
+		HostData = (T *) calloc(1, TotalBytes);
 		checkCudaErrors(cudaMalloc((void **)& DeviceData, TotalBytes));
+
+//		for(int i = 0; i < length; i++)
+//		{
+//			HostData[i] = new T();
+//		}
 
 		cout << "construct" << "\n";
 	}
