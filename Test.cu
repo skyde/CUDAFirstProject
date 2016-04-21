@@ -60,55 +60,79 @@ public:
 //}
 
 __global__ void ForwardPass(
-		double* source,
-		double* weights,
-		double* target,
-		double* biases)
+		double* leftValues,
+		double* weights, // left to right
+		double* rightValues, // write target
+		double* rightBiases)
 {
 	int index = threadIdx.x + blockIdx.x * blockDim.x;
 
-	double output = source[index];
+	double output = leftValues[index];
 
 	for(int i = 0; i < N; i++)
 	{
 		output *= weights[index * N + i];
 	}
 
-	target[index] = tanh(output + biases[index]);
+	rightValues[index] = tanh(output + rightBiases[index]);
 }
 
-//__global__ void BackwardPass(double* source, double* weights, double* target)
+__global__ void BackwardPass(
+		double* leftValues,
+		double* leftBiases,
+		double* leftDerivatives,
+		double* weights,
+		double* rightValues,
+		double* rightBiases,
+		double* rightDerivatives)
+{
+	int index = threadIdx.x + blockIdx.x * blockDim.x;
+
+	double output = leftValues[index];
+
+	for(int i = 0; i < N; i++)
+	{
+		output *= weights[index * N + i];
+	}
+
+	rightValues[index] = tanh(output + rightBiases[index]);
+}
+//__global__ void BackwardPass(
+//		double* left,
+//		double* weights, // left to right
+//		double* right,
+//		double* biases)
 //{
 //	int index = threadIdx.x + blockIdx.x * blockDim.x;
 //
-//	double output = source[index];
+//	double output = left[index];
 //
 //	for(int i = 0; i < N; i++)
 //	{
 //		output *= weights[index * N + i];
 //	}
 //
-//	target[index] = tanh(output);
+//	right[index] = tanh(output + biases[index]);
 //}
 
 int main(int argc, char **argv)
 {
 	printf ("N = %d \n", N);
 
-	SharedData* sourceLayer = new SharedData(N);
+	SharedData* leftValues = new SharedData(N);
 	SharedData* weights = new SharedData(N * N);
-	SharedData* nextLayer = new SharedData(N);
-	SharedData* nextLayerBiases = new SharedData(N);
+	SharedData* rightValues = new SharedData(N);
+	SharedData* rightBiases = new SharedData(N);
 
-	randomValues(sourceLayer->HostData, sourceLayer->Length);
+	randomValues(leftValues->HostData, leftValues->Length);
 	randomValues(weights->HostData, weights->Length);
-	randomValues(nextLayerBiases->HostData, nextLayerBiases->Length);
+	randomValues(rightBiases->HostData, rightBiases->Length);
 
 	cout << "Generated random values\n";
 
-	sourceLayer->CopyToDevice();
+	leftValues->CopyToDevice();
 	weights->CopyToDevice();
-	nextLayerBiases->CopyToDevice();
+	rightBiases->CopyToDevice();
 
 	cout << "Copy to device calls after initiated\n";
 
@@ -119,14 +143,14 @@ int main(int argc, char **argv)
 //	dim3 numBlocks(N / threadsPerBlock.x, N / threadsPerBlock.y);
 
 	ForwardPass<<<N / M, M>>>(
-			sourceLayer->DeviceData,
+			leftValues->DeviceData,
 			weights->DeviceData,
-			nextLayer->DeviceData,
-			nextLayerBiases->DeviceData);
+			rightValues->DeviceData,
+			rightBiases->DeviceData);
 
 	cout << "RunPass initiated\n";
 
-	nextLayer->CopyToHost();
+	rightValues->CopyToHost();
 
 	cout << "CopyToHost initiated\n";
 
@@ -138,17 +162,17 @@ int main(int argc, char **argv)
 
     cout << "Execution finished, will print\n";
 
-	for(int i = 0; i < nextLayer->Length && i < 512; i++)
+	for(int i = 0; i < rightValues->Length && i < 512; i++)
 	{
-		cout << sourceLayer->HostData[i] << " = " << nextLayer->HostData[i] << "\n";
+		cout << leftValues->HostData[i] << " = " << rightValues->HostData[i] << "\n";
 	}
 
     cout << "print finished\n";
 
-	sourceLayer->Dispose();
+	leftValues->Dispose();
 	weights->Dispose();
-	nextLayer->Dispose();
-	nextLayerBiases->Dispose();
+	rightValues->Dispose();
+	rightBiases->Dispose();
 
     cout << "dispose finished\n";
 
@@ -156,10 +180,10 @@ int main(int argc, char **argv)
 
     cout << "cudaDeviceReset finished\n";
 
-	delete sourceLayer;
+	delete leftValues;
 	delete weights;
-	delete nextLayer;
-	delete nextLayerBiases;
+	delete rightValues;
+	delete rightBiases;
 
     cout << "will exit\n";
 
