@@ -59,7 +59,11 @@ public:
 //	}
 //}
 
-__global__ void RunPass(double* source, double* weights, double* target)
+__global__ void ForwardPass(
+		double* source,
+		double* weights,
+		double* target,
+		double* biases)
 {
 	int index = threadIdx.x + blockIdx.x * blockDim.x;
 
@@ -70,55 +74,42 @@ __global__ void RunPass(double* source, double* weights, double* target)
 		output *= weights[index * N + i];
 	}
 
-	target[index] = output * 2;
-//	__shared__ int temp[M + 2 * RADIUS];
-//	int gindex = threadIdx.x + blockIdx.x * blockDim.x;
-//	int lindex = threadIdx.x + RADIUS;
-//
-//	temp[lindex] = in[gindex];
-//
-//	if(threadIdx.x < RADIUS)
-//	{
-//		temp[lindex - RADIUS] = in[gindex - RADIUS];
-//		temp[lindex + M] = in[gindex + M];
-//	}
-//
-//	__syncthreads();
-//
-//	int result = 0;
-//
-//	for	(int offset = -RADIUS; offset <= RADIUS; offset++)
-//	{
-//		result += temp[lindex + offset];
-//	}
-//
-//	out[gindex] = result;
+	target[index] = tanh(output + biases[index]);
 }
 
-//template <class T>
-//class Stack {
-//};
+//__global__ void BackwardPass(double* source, double* weights, double* target)
+//{
+//	int index = threadIdx.x + blockIdx.x * blockDim.x;
+//
+//	double output = source[index];
+//
+//	for(int i = 0; i < N; i++)
+//	{
+//		output *= weights[index * N + i];
+//	}
+//
+//	target[index] = tanh(output);
+//}
 
 int main(int argc, char **argv)
 {
-//	initGL(&argc, argv);
 	printf ("N = %d \n", N);
 
-	SharedData* layer0 = new SharedData(N);
+	SharedData* sourceLayer = new SharedData(N);
 	SharedData* weights = new SharedData(N * N);
-	SharedData* layer1 = new SharedData(N);
+	SharedData* nextLayer = new SharedData(N);
+	SharedData* nextLayerBiases = new SharedData(N);
 
-//    cudaDeviceSynchronize();
-
-	randomValues(layer0->HostData, layer0->Length);
+	randomValues(sourceLayer->HostData, sourceLayer->Length);
 	randomValues(weights->HostData, weights->Length);
-//	random_ints(b->HostData, N);
+	randomValues(nextLayerBiases->HostData, nextLayerBiases->Length);
 
 	cout << "Generated random values\n";
 
-	layer0->CopyToDevice();
+	sourceLayer->CopyToDevice();
 	weights->CopyToDevice();
-//	b->CopyToDevice();
+	nextLayerBiases->CopyToDevice();
+
 	cout << "Copy to device calls after initiated\n";
 
 //	cudaMemcpy(d_a, a, size, cudaMemcpyHostToDevice);
@@ -127,55 +118,52 @@ int main(int argc, char **argv)
 //	dim3 threadsPerBlock(16, 16);
 //	dim3 numBlocks(N / threadsPerBlock.x, N / threadsPerBlock.y);
 
-	RunPass<<<N / M, M>>>(layer0->DeviceData, weights->DeviceData, layer1->DeviceData);
+	ForwardPass<<<N / M, M>>>(
+			sourceLayer->DeviceData,
+			weights->DeviceData,
+			nextLayer->DeviceData,
+			nextLayerBiases->DeviceData);
 
 	cout << "RunPass initiated\n";
-//    cudaError_t err = cudaGetLastError();
-//
-//    if (cudaSuccess != err)
-//    {
-//        fprintf(stderr, "%s(%i) : getLastCudaError() CUDA error : %s : (%d) %s.\n",
-//                file, line, "Execution on device failed", (int)err, cudaGetErrorString(err));
-//        DEVICE_RESET
-//        exit(EXIT_FAILURE);
-//    }
 
-//    cudaDeviceSynchronize();
-
-	layer1->CopyToHost();
+	nextLayer->CopyToHost();
 
 	cout << "CopyToHost initiated\n";
-//	cudaMemcpy(c, d_c, size, cudaMemcpyDeviceToHost);
 
     cudaDeviceSynchronize();
+
 	cout << "cudaDeviceSynchronize finished\n";
 
     getLastCudaError("Device kernel execution failed.\n");
 
     cout << "Execution finished, will print\n";
 
-	for(int i = 0; i < layer1->Length && i < 512; i++)
+	for(int i = 0; i < nextLayer->Length && i < 512; i++)
 	{
-		cout << layer0->HostData[i] << " = " << layer1->HostData[i] << "\n";
+		cout << sourceLayer->HostData[i] << " = " << nextLayer->HostData[i] << "\n";
 	}
 
     cout << "print finished\n";
 
-	layer0->Dispose();
+	sourceLayer->Dispose();
 	weights->Dispose();
-	layer1->Dispose();
+	nextLayer->Dispose();
+	nextLayerBiases->Dispose();
 
     cout << "dispose finished\n";
 
-//    cudaDeviceReset();
-    cout << "cudaDeviceReset finished\n";
-    exit(EXIT_SUCCESS);
+    cudaDeviceReset();
 
-	delete layer0;
+    cout << "cudaDeviceReset finished\n";
+
+	delete sourceLayer;
 	delete weights;
-	delete layer1;
+	delete nextLayer;
+	delete nextLayerBiases;
 
     cout << "will exit\n";
+
+//    exit(EXIT_SUCCESS);
 
 	return 0;
 }
@@ -185,7 +173,7 @@ void randomValues(double* a, int n)
 	int i;
 	for (i = 0; i < n; ++i)
 	{
-		a[i] = 1.0 + (double)rand() / RAND_MAX;
+		a[i] = 0.5 + (double)rand() / RAND_MAX;
 
 		cout << "random = " << a[i] << "\n";
 	}
