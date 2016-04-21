@@ -10,7 +10,7 @@ using namespace std;
 //void initGL(int *argc, char **argv);
 
 // Total Threads
-#define N 2 // 4096
+#define N 2 // Nodes per layer
 // Block Size
 #define M 1 // 512
 
@@ -106,10 +106,6 @@ int main(int argc, char **argv)
 {
 	printf ("N = %d \n", N);
 
-//	SharedData<Node>* layer0 = new SharedData<Node>(N);
-//	SharedData<Element>* weight0to1 = new SharedData<Element>(N * N);
-//	SharedData<Node>* layer1 = new SharedData<Node>(N);
-
 	array<SharedData<Node>*, LAYERS> layers;
 	array<SharedData<Element>*, LAYERS - 1> weights;
 
@@ -119,10 +115,8 @@ int main(int argc, char **argv)
 
 		if(i != 0)
 		{
-//			cout << i - 1 << " " << i << "\n";
 			int length = layers[i - 1]->Length * layers[i]->Length;
 
-//			cout << length << "\n";
 			weights[i - 1] = new SharedData<Element>(length);
 
 			cout << "weights " << i - 1 << ", l = " << length << "\n";
@@ -174,18 +168,18 @@ int main(int argc, char **argv)
 
     cout << "Execution finished, will print\n";
 
-    int numLayers = 2;
-    int nodesPerLayer = N;
+//    int numLayers = 2;
+//    int nodesPerLayer = N;
 
-	for(int y = 0; y < nodesPerLayer; y++)
+	for(int y = 0; y < N; y++)
 	{
-		for(int x = 0; x < numLayers; x++)
+		for(int x = 0; x < LAYERS; x++)
 		{
 			layers[x]->HostData[y].Print();
 			cout << " ";
 
 			int nextLayer = x + 1;
-			if(nextLayer < numLayers)
+			if(nextLayer < LAYERS)
 			{
 				int block = layers[nextLayer]->Length;
 				for(int w = 0; w < block; w++)
