@@ -21,7 +21,7 @@ public:
 //			HostData[i] = new T();
 //		}
 
-		cout << "construct" << "\n";
+//		cout << "construct" << "\n";
 	}
 
 	virtual ~SharedData()
@@ -29,7 +29,7 @@ public:
 		free(HostData);
 		cudaFree(DeviceData);
 
-		cout << "deconstruct" << "\n";
+//		cout << "deconstruct" << "\n";
 	}
 
 //	void Dispose()

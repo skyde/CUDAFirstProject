@@ -16,6 +16,8 @@ using namespace std;
 
 #define LAYERS 2
 
+#define PRINT_DERIVATIVE false
+
 //#define RADIUS 1
 
 
@@ -33,7 +35,7 @@ struct __align__(sizeof(double) * 2) Element
 {
 	Element() : Value(0), Derivative(0)
 	{
-		cout << "Element ctor";
+//		cout << "Element ctor";
 	}
 
     double Value, Derivative;
@@ -41,7 +43,11 @@ struct __align__(sizeof(double) * 2) Element
 	public:
 	void Print()
 	{
-		cout << "[" << Value << " " << Derivative << "]";
+		cout << "[" << Value;
+#if PRINT_DERIVATIVE
+		cout << " " << Derivative;
+#endif
+		cout << "]";
 	}
 };
 
@@ -49,18 +55,21 @@ struct __align__(sizeof(Element) * 2) Node
 {
 	Node() : Self(), Bias()
 	{
-		cout << "Node ctor";
+//		cout << "Node ctor";
 	}
-//	{
-//		Self = new Element();
-//	}
 
 	Element Self, Bias;
 
 	public:
 	void Print()
 	{
-		cout << "(" << Self.Value << " " << Self.Derivative << ")";
+		cout << "(" << Self.Value;
+#if PRINT_DERIVATIVE
+		cout << " " << Self.Derivative;
+#endif
+		cout << ")";
+
+//		cout << "(" << Self.Value << " " << Self.Derivative << ")";
 	}
 };
 
@@ -70,25 +79,31 @@ void randomValues(Element* a, int n);
 
 __global__ void ForwardPass(
 		Node* left,
+		int leftLength,
 		Element* weights, // left to right
-		Node* right)
+		Node* right,
+		int rightLength)
 {
 	int index = threadIdx.x + blockIdx.x * blockDim.x;
 
-	double output = left[index].Self.Value;
+	double value = 0;//left[index].Self.Value;
 
-	for(int i = 0; i < N; i++)
+	for(int i = 0; i < leftLength; i++)
 	{
-		output *= weights[index * N + i].Value;
+		int lookup = index + i * rightLength;
+
+		value += left[i].Self.Value * weights[lookup].Value;
 	}
 
-	right[index].Self.Value = tanh(output + right[index].Bias.Value);
+	right[index].Self.Value = value;// + right[index].Bias.Value
 }
 
 __global__ void BackwardPass(
 		Node* left,
+		int leftLength,
 		Element* weights,
-		Node* right)
+		Node* right,
+		int rightLength)
 {
 //	int index = threadIdx.x + blockIdx.x * blockDim.x;
 //
@@ -124,10 +139,10 @@ int main(int argc, char **argv)
 	}
 
 	layers[0]->HostData[0].Self.Value = 1;
-	layers[0]->HostData[1].Self.Value = 2;
+	layers[0]->HostData[1].Self.Value = 10;
 
-	layers[1]->HostData[0].Self.Value = 10;
-	layers[1]->HostData[1].Self.Value = 20;
+//	layers[1]->HostData[0].Self.Value = 10;
+//	layers[1]->HostData[1].Self.Value = 20;
 
 	weights[0]->HostData[0].Value = 1;
 	weights[0]->HostData[1].Value = 0.5;
@@ -144,15 +159,19 @@ int main(int argc, char **argv)
 
 	ForwardPass<<<N / M, M>>>(
 			layers[0]->DeviceData,
+			layers[0]->Length,
 			weights[0]->DeviceData,
-			layers[1]->DeviceData);
+			layers[1]->DeviceData,
+			layers[1]->Length);
 
     cudaDeviceSynchronize();
 
 	BackwardPass<<<N / M, M>>>(
 			layers[0]->DeviceData,
+			layers[0]->Length,
 			weights[0]->DeviceData,
-			layers[1]->DeviceData);
+			layers[1]->DeviceData,
+			layers[1]->Length);
 
 	cout << "RunPass initiated\n";
 
