@@ -2,6 +2,7 @@
 #include <iostream>
 #include <array>
 #include "helper_cuda.h"
+#include <stdlib.h>
 
 #include "SharedData.cu"
 #include "Layer.cu"
@@ -16,7 +17,7 @@ using namespace std;
 
 #define LAYERS 2
 
-#define PRINT_DERIVATIVE false
+#define PRINT_DERIVATIVE true
 
 //#define RADIUS 1
 
@@ -43,7 +44,9 @@ struct __align__(sizeof(double) * 2) Element
 	public:
 	void Print()
 	{
+//		system("Color 1A");
 		cout << "[" << Value;
+//		system("Color 2B");
 #if PRINT_DERIVATIVE
 		cout << " " << Derivative;
 #endif
@@ -90,12 +93,15 @@ __global__ void ForwardPass(
 
 	for(int i = 0; i < leftLength; i++)
 	{
-		int lookup = index + i * rightLength;
+		int w = index + i * rightLength;
 
-		value += left[i].Self.Value * weights[lookup].Value;
+		value += left[i].Self.Value * weights[w].Value;
+
+//		weights[w].Derivative = -9;
 	}
 
-	right[index].Self.Value = value;// + right[index].Bias.Value
+	right[index].Self.Value = value;
+//	right[index].Self.Derivative = -7;// + right[index].Bias.Value
 }
 
 __global__ void BackwardPass(
@@ -105,6 +111,19 @@ __global__ void BackwardPass(
 		Node* right,
 		int rightLength)
 {
+	int index = threadIdx.x + blockIdx.x * blockDim.x;
+
+	double nodeDerivative = right[index].Self.Derivative;
+
+	for(int i = 0; i < rightLength; i++)
+	{
+		int w = index * rightLength + i;
+
+		weights[w].Derivative = weights[w].Value * right[i].Self.Derivative;
+
+//		value += left[i].Self.Value * weights[w].Value;
+	}
+
 //	int index = threadIdx.x + blockIdx.x * blockDim.x;
 //
 //	double output = left[index].Self.Value;
@@ -141,8 +160,8 @@ int main(int argc, char **argv)
 	layers[0]->HostData[0].Self.Value = 1;
 	layers[0]->HostData[1].Self.Value = 2;
 
-//	layers[1]->HostData[0].Self.Value = 10;
-//	layers[1]->HostData[1].Self.Value = 20;
+	layers[1]->HostData[0].Self.Derivative = 1;
+	layers[1]->HostData[1].Self.Derivative = 0.1;
 
 	weights[0]->HostData[0].Value = 1;
 	weights[0]->HostData[1].Value = 0.5;
@@ -174,7 +193,10 @@ int main(int argc, char **argv)
 			layers[1]->Length);
 
 	cout << "RunPass initiated\n";
+//    cudaDeviceSynchronize();
 
+	layers[0]->CopyToHost();
+	weights[0]->CopyToHost();
 	layers[1]->CopyToHost();
 
 	cout << "CopyToHost initiated\n";
