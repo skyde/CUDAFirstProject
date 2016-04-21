@@ -52,16 +52,16 @@ int main(int argc, char **argv)
 {
 	NeuralNetwork* n = new NeuralNetwork();
 
-	n->layers[0]->HostData[0].Self.Value = 1;
-	n->layers[0]->HostData[1].Self.Value = 2;
+	n->Layers[0]->HostData[0].Self.Value = 1;
+	n->Layers[0]->HostData[1].Self.Value = 2;
 
-	n->layers[1]->HostData[0].Self.Derivative = 1;
-	n->layers[1]->HostData[1].Self.Derivative = 0.1;
+	n->Layers[1]->HostData[0].Self.Derivative = 1;
+	n->Layers[1]->HostData[1].Self.Derivative = 0.1;
 
-	n->weights[0]->HostData[0].Value = 1;
-	n->weights[0]->HostData[1].Value = 0.5;
-	n->weights[0]->HostData[2].Value = 0;
-	n->weights[0]->HostData[3].Value = 1;
+	n->Weights[0]->HostData[0].Value = 1;
+	n->Weights[0]->HostData[1].Value = 0.5;
+	n->Weights[0]->HostData[2].Value = 0;
+	n->Weights[0]->HostData[3].Value = 1;
 
 	n->CopyToDevice();
 
@@ -69,18 +69,18 @@ int main(int argc, char **argv)
 
 
 	ForwardPass<<<N / M, M>>>(
-			n->layers[0]->DeviceData,
-			n->layers[0]->Length,
-			n->weights[0]->DeviceData,
-			n->layers[1]->DeviceData,
-			n->layers[1]->Length);
+			n->Layers[0]->DeviceData,
+			n->Layers[0]->Length,
+			n->Weights[0]->DeviceData,
+			n->Layers[1]->DeviceData,
+			n->Layers[1]->Length);
 
 	BackwardPass<<<N / M, M>>>(
-			n->layers[0]->DeviceData,
-			n->layers[0]->Length,
-			n->weights[0]->DeviceData,
-			n->layers[1]->DeviceData,
-			n->layers[1]->Length);
+			n->Layers[0]->DeviceData,
+			n->Layers[0]->Length,
+			n->Weights[0]->DeviceData,
+			n->Layers[1]->DeviceData,
+			n->Layers[1]->Length);
 
 	cout << "RunPass initiated\n";
 

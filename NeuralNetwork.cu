@@ -30,23 +30,23 @@ public:
 //		array<SharedData<Node>*, LAYERS> layers;
 //		array<SharedData<Element>*, LAYERS - 1> weights;
 
-		for(int i = 0; i < layers.size(); i++)
+		for(int i = 0; i < Layers.size(); i++)
 		{
-			layers[i] = new SharedData<Node>(N);
+			Layers[i] = new SharedData<Node>(N);
 
 			if(i != 0)
 			{
-				int length = layers[i - 1]->Length * layers[i]->Length;
+				int length = Layers[i - 1]->Length * Layers[i]->Length;
 
-				weights[i - 1] = new SharedData<Element>(length);
+				Weights[i - 1] = new SharedData<Element>(length);
 
 				cout << "weights " << i - 1 << ", l = " << length << "\n";
 			}
 		}
 	}
 
-	array<SharedData<Node>*, LAYERS> layers;
-	array<SharedData<Element>*, LAYERS - 1> weights;
+	array<SharedData<Node>*, LAYERS> Layers;
+	array<SharedData<Element>*, LAYERS - 1> Weights;
 
 //	void randomValues(double* a, int n);
 //	void randomValues(Node* a, int n);
@@ -74,27 +74,27 @@ public:
 
 	void CopyToDevice()
 	{
-		for(int i = 0; i < layers.size(); ++i)
+		for(int i = 0; i < Layers.size(); ++i)
 		{
-			layers[i]->CopyToDevice();
+			Layers[i]->CopyToDevice();
 		}
 
-		for(int i = 0; i < weights.size(); ++i)
+		for(int i = 0; i < Weights.size(); ++i)
 		{
-			weights[i]->CopyToDevice();
+			Weights[i]->CopyToDevice();
 		}
 	}
 
 	void CopyToHost()
 	{
-		for(int i = 0; i < layers.size(); ++i)
+		for(int i = 0; i < Layers.size(); ++i)
 		{
-			layers[i]->CopyToHost();
+			Layers[i]->CopyToHost();
 		}
 
-		for(int i = 0; i < weights.size(); ++i)
+		for(int i = 0; i < Weights.size(); ++i)
 		{
-			weights[i]->CopyToHost();
+			Weights[i]->CopyToHost();
 		}
 	}
 
@@ -104,20 +104,20 @@ public:
 		{
 			for(int x = 0; x < LAYERS; x++)
 			{
-				((Node)layers[x]->HostData[y]).Print();
+				((Node)Layers[x]->HostData[y]).Print();
 				cout << " ";
 
 				int nextLayer = x + 1;
 				if(nextLayer < LAYERS)
 				{
-					int block = layers[nextLayer]->Length;
+					int block = Layers[nextLayer]->Length;
 					for(int w = 0; w < block; w++)
 					{
 						int index = y * block + w;
 
 						cout << y << "->" << w;
 
-						((Element)weights[x]->HostData[index]).Print();
+						((Element)Weights[x]->HostData[index]).Print();
 
 						cout << " ";
 					}
@@ -163,14 +163,14 @@ public:
 
 	virtual ~NeuralNetwork()
 	{
-		for(int i = 0; i < layers.size(); i++)
+		for(int i = 0; i < Layers.size(); i++)
 		{
-			delete layers[i];
+			delete Layers[i];
 		}
 
-		for(int i = 0; i < weights.size(); i++)
+		for(int i = 0; i < Weights.size(); i++)
 		{
-			delete weights[i];
+			delete Weights[i];
 		}
 	}
 };
