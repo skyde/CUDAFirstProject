@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <iostream>
+#include <array>
 #include "helper_cuda.h"
 
 #include "SharedData.cu"
@@ -13,7 +14,9 @@ using namespace std;
 // Block Size
 #define M 1 // 512
 
-#define RADIUS 1
+#define LAYERS 2
+
+//#define RADIUS 1
 
 
 //__global__ void add(int *a, int *b, int *c, int n)
@@ -107,12 +110,29 @@ int main(int argc, char **argv)
 	SharedData<Element>* weight0to1 = new SharedData<Element>(N * N);
 	SharedData<Node>* layer1 = new SharedData<Node>(N);
 
-	SharedData<Node>* layers [2] = { layer0, layer1 };
-	SharedData<Element>* weights [1] = { weight0to1 };
+	array<SharedData<Node>*, LAYERS> layers;
+	array<SharedData<Element>*, LAYERS - 1> weights;
+
+	for(int i = 0; i < layers.size(); i++)
+	{
+		layers[i] = new SharedData<Node>(N);
+
+		if(i != 0)
+		{
+//			cout << i - 1 << " " << i << "\n";
+			int length = layers[i - 1]->Length * layers[i]->Length;
+
+//			cout << length << "\n";
+			weights[i - 1] = new SharedData<Element>(length);
+
+			cout << "weights " << i - 1 << ", l = " << length << "\n";
+		}
+	}
 
 //	randomValues(layer0->HostData, layer0->Length);
 //	randomValues(weights->HostData, weights->Length);
 //	randomValues(layer1->HostData, layer1->Length);
+
 	layer0->HostData[0].Self.Value = 1;
 	layer0->HostData[1].Self.Value = 2;
 
