@@ -6,7 +6,6 @@
 #include "Layer.cu"
 using namespace std;
 
-void randomValues(double* a, int n);
 //void initGL(int *argc, char **argv);
 
 // Total Threads
@@ -27,44 +26,59 @@ void randomValues(double* a, int n);
 //	}
 //}
 
+struct __align__(sizeof(double) * 2) Element
+{
+    double Value, Derivative;
+};
+
+struct __align__(sizeof(Element) * 2) Node
+{
+	Element Self, Bias;
+};
+
+void randomValues(double* a, int n);
+void randomValues(Node* a, int n);
+void randomValues(Element* a, int n);
+
 __global__ void ForwardPass(
-		double* leftValues,
-		double* weights, // left to right
-		double* rightValues, // write target
-		double* rightBiases)
+		Node* left,
+		Element* weights, // left to right
+		Node* right)
 {
 	int index = threadIdx.x + blockIdx.x * blockDim.x;
 
-	double output = leftValues[index];
+	double output = left[index].Self.Value;
 
 	for(int i = 0; i < N; i++)
 	{
-		output *= weights[index * N + i];
+		output *= weights[index * N + i].Value;
 	}
 
-	rightValues[index] = tanh(output + rightBiases[index]);
+	right[index].Self.Value = tanh(output + right[index].Bias.Value);
 }
 
-__global__ void BackwardPass(
-		double* leftValues,
-		double* leftBiases,
-		double* leftDerivatives,
-		double* weights,
-		double* rightValues,
-		double* rightBiases,
-		double* rightDerivatives)
-{
-	int index = threadIdx.x + blockIdx.x * blockDim.x;
-
-	double output = leftValues[index];
-
-	for(int i = 0; i < N; i++)
-	{
-		output *= weights[index * N + i];
-	}
-
-	rightValues[index] = tanh(output + rightBiases[index]);
-}
+//__global__ void BackwardPass(
+//		double* leftValues,
+//		double* leftValuesDerivatives,
+//		double* leftBiases,
+//		double* leftBiasesDerivatives,
+//		double* weights,
+//		double* weightsDerivatives,
+//		double* rightValues,
+//		double* rightValuesDerivatives,
+//		double* rightBiasesDerivatives)
+//{
+////	int index = threadIdx.x + blockIdx.x * blockDim.x;
+////
+////	double output = leftValues[index];
+////
+////	for(int i = 0; i < N; i++)
+////	{
+////		output *= weights[index * N + i];
+////	}
+////
+////	rightValues[index] = tanh(output + rightBiases[index]);
+//}
 //__global__ void BackwardPass(
 //		double* left,
 //		double* weights, // left to right
@@ -87,22 +101,24 @@ int main(int argc, char **argv)
 {
 	printf ("N = %d \n", N);
 
-	Layer* layer0 = new Layer(N);
+	SharedData<Node>* layer0 = new SharedData<Node>(N);
+	SharedData<Element>* weights = new SharedData<Element>(N * N);
+	SharedData<Node>* layer1 = new SharedData<Node>(N);
 
-	SharedData<double>* leftValues = new SharedData<double>(N);
-	SharedData<double>* weights = new SharedData<double>(N * N);
-	SharedData<double>* rightValues = new SharedData<double>(N);
-	SharedData<double>* rightBiases = new SharedData<double>(N);
+//	SharedData<double>* leftValues = new SharedData<double>(N);
+//	SharedData<double>* weights = new SharedData<double>(N * N);
+//	SharedData<double>* rightValues = new SharedData<double>(N);
+//	SharedData<double>* rightBiases = new SharedData<double>(N);
 
-	randomValues(leftValues->HostData, leftValues->Length);
+	randomValues(layer0->HostData, layer0->Length);
 	randomValues(weights->HostData, weights->Length);
-	randomValues(rightBiases->HostData, rightBiases->Length);
+	randomValues(layer1->HostData, layer1->Length);
 
 	cout << "Generated random values\n";
 
-	leftValues->CopyToDevice();
+	layer0->CopyToDevice();
 	weights->CopyToDevice();
-	rightBiases->CopyToDevice();
+	layer1->CopyToDevice();
 
 	cout << "Copy to device calls after initiated\n";
 
@@ -113,14 +129,13 @@ int main(int argc, char **argv)
 //	dim3 numBlocks(N / threadsPerBlock.x, N / threadsPerBlock.y);
 
 	ForwardPass<<<N / M, M>>>(
-			leftValues->DeviceData,
+			layer0->DeviceData,
 			weights->DeviceData,
-			rightValues->DeviceData,
-			rightBiases->DeviceData);
+			layer1->DeviceData);
 
 	cout << "RunPass initiated\n";
 
-	rightValues->CopyToHost();
+	layer1->CopyToHost();
 
 	cout << "CopyToHost initiated\n";
 
@@ -132,9 +147,9 @@ int main(int argc, char **argv)
 
     cout << "Execution finished, will print\n";
 
-	for(int i = 0; i < rightValues->Length && i < 512; i++)
+	for(int i = 0; i < layer0->Length && i < 512; i++)
 	{
-		cout << leftValues->HostData[i] << " = " << rightValues->HostData[i] << "\n";
+		cout << layer0->HostData[i].Self.Value << " = " << layer1->HostData[i].Self.Value << "\n";
 	}
 
     cout << "print finished\n";
@@ -144,10 +159,9 @@ int main(int argc, char **argv)
 //	rightValues->Dispose();
 //	rightBiases->Dispose();
 
-	delete leftValues;
+	delete layer0;
 	delete weights;
-	delete rightValues;
-	delete rightBiases;
+	delete layer1;
 
     cout << "dispose finished\n";
 
@@ -162,13 +176,38 @@ int main(int argc, char **argv)
 	return 0;
 }
 
+inline double randomValue()
+{
+	return 0.5 + (double)rand() / RAND_MAX;
+}
+
 void randomValues(double* a, int n)
 {
 	int i;
 	for (i = 0; i < n; ++i)
 	{
-		a[i] = 0.5 + (double)rand() / RAND_MAX;
+		a[i] = randomValue();
 
-		cout << "random = " << a[i] << "\n";
+//		cout << "random = " << a[i] << "\n";
 	}
 }
+
+void randomValues(Node* a, int n)
+{
+	int i;
+	for (i = 0; i < n; ++i)
+	{
+		a[i].Self.Value = randomValue();
+		a[i].Bias.Value = randomValue();
+	}
+}
+
+void randomValues(Element* a, int n)
+{
+	int i;
+	for (i = 0; i < n; ++i)
+	{
+		a[i].Value = randomValue();
+	}
+}
+
