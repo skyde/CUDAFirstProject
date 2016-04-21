@@ -1,8 +1,10 @@
 #pragma once
+
 #include <stdio.h>
 #include <iostream>
 #include <array>
 #include <stdlib.h>
+#include "Globals.h"
 
 using namespace std;
 

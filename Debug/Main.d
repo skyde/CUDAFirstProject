@@ -1,4 +1,4 @@
-./Element.o : ../Element.cu \
+./Main.o : ../Main.cu \
     /Developer/NVIDIA/CUDA-7.5/bin/../include/cuda_runtime.h \
     /Developer/NVIDIA/CUDA-7.5/bin/../include/host_config.h \
     /Developer/NVIDIA/CUDA-7.5/bin/../include/builtin_types.h \
@@ -247,4 +247,10 @@
     /Volumes/Xcode/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../include/c++/v1/bitset \
     /Volumes/Xcode/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../include/c++/v1/__bit_reference \
     /Volumes/Xcode/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../include/c++/v1/array \
-    ../Globals.h
+    ../NeuralNetwork.cu \
+    ../helper_cuda.h \
+    ../SharedData.cu \
+    ../Layer.cu \
+    ../Element.cu \
+    ../Globals.h \
+    ../Node.cu

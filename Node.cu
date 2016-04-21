@@ -3,8 +3,9 @@
 #include <iostream>
 #include <array>
 #include <stdlib.h>
-using namespace std;
 #include "Element.cu"
+#include "Globals.h"
+using namespace std;
 
 struct __align__(sizeof(Element) * 2) Node
 {

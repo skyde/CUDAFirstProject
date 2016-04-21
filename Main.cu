@@ -1,28 +1,9 @@
 #include <stdio.h>
 #include <iostream>
 #include <array>
-#include "helper_cuda.h"
-#include <stdlib.h>
-
-#include "SharedData.cu"
-#include "Layer.cu"
-#include "Element.cu"
-#include "Node.cu"
 using namespace std;
 
-// Total Threads
-#define N 2 // Nodes per layer
-// Block Size
-#define M 1 // 512
-
-#define LAYERS 2
-
-#define PRINT_DERIVATIVE true
-
-void randomValues(double* a, int n);
-void randomValues(Node* a, int n);
-void randomValues(Element* a, int n);
-
+#include "NeuralNetwork.cu"
 __global__ void ForwardPass(
 		Node* left,
 		int leftLength,
@@ -69,64 +50,56 @@ __global__ void BackwardPass(
 
 int main(int argc, char **argv)
 {
-	printf ("N = %d \n", N);
+//	printf ("N = %d \n", N);
 
-	array<SharedData<Node>*, LAYERS> layers;
-	array<SharedData<Element>*, LAYERS - 1> weights;
+	NeuralNetwork* n = new NeuralNetwork();
 
-	for(int i = 0; i < layers.size(); i++)
-	{
-		layers[i] = new SharedData<Node>(N);
+//	network->
 
-		if(i != 0)
-		{
-			int length = layers[i - 1]->Length * layers[i]->Length;
+	n->layers[0]->HostData[0].Self.Value = 1;
+	n->layers[0]->HostData[1].Self.Value = 2;
 
-			weights[i - 1] = new SharedData<Element>(length);
+	n->layers[1]->HostData[0].Self.Derivative = 1;
+	n->layers[1]->HostData[1].Self.Derivative = 0.1;
 
-			cout << "weights " << i - 1 << ", l = " << length << "\n";
-		}
-	}
-
-	layers[0]->HostData[0].Self.Value = 1;
-	layers[0]->HostData[1].Self.Value = 2;
-
-	layers[1]->HostData[0].Self.Derivative = 1;
-	layers[1]->HostData[1].Self.Derivative = 0.1;
-
-	weights[0]->HostData[0].Value = 1;
-	weights[0]->HostData[1].Value = 0.5;
-	weights[0]->HostData[2].Value = 0;
-	weights[0]->HostData[3].Value = 1;
+	n->weights[0]->HostData[0].Value = 1;
+	n->weights[0]->HostData[1].Value = 0.5;
+	n->weights[0]->HostData[2].Value = 0;
+	n->weights[0]->HostData[3].Value = 1;
 
 //	cout << "Generated random values\n";
+	n->CopyToDevice();
 
-	layers[0]->CopyToDevice();
-	weights[0]->CopyToDevice();
-	layers[1]->CopyToDevice();
+//	layers[0]->CopyToDevice();
+//	weights[0]->CopyToDevice();
+//	layers[1]->CopyToDevice();
 
 	cout << "Copy to device calls after initiated\n";
 
+
 	ForwardPass<<<N / M, M>>>(
-			layers[0]->DeviceData,
-			layers[0]->Length,
-			weights[0]->DeviceData,
-			layers[1]->DeviceData,
-			layers[1]->Length);
+			n->layers[0]->DeviceData,
+			n->layers[0]->Length,
+			n->weights[0]->DeviceData,
+			n->layers[1]->DeviceData,
+			n->layers[1]->Length);
 
 	BackwardPass<<<N / M, M>>>(
-			layers[0]->DeviceData,
-			layers[0]->Length,
-			weights[0]->DeviceData,
-			layers[1]->DeviceData,
-			layers[1]->Length);
+			n->layers[0]->DeviceData,
+			n->layers[0]->Length,
+			n->weights[0]->DeviceData,
+			n->layers[1]->DeviceData,
+			n->layers[1]->Length);
+//	n->Forward();
+//	n->Backward();
 
 	cout << "RunPass initiated\n";
 //    cudaDeviceSynchronize();
-
-	layers[0]->CopyToHost();
-	weights[0]->CopyToHost();
-	layers[1]->CopyToHost();
+	n->CopyToHost();
+//
+//	layers[0]->CopyToHost();
+//	weights[0]->CopyToHost();
+//	layers[1]->CopyToHost();
 
 	cout << "CopyToHost initiated\n";
 
@@ -138,44 +111,10 @@ int main(int argc, char **argv)
 
     cout << "Execution finished, will print\n";
 
-	for(int y = 0; y < N; y++)
-	{
-		for(int x = 0; x < LAYERS; x++)
-		{
-			layers[x]->HostData[y].Print();
-			cout << " ";
-
-			int nextLayer = x + 1;
-			if(nextLayer < LAYERS)
-			{
-				int block = layers[nextLayer]->Length;
-				for(int w = 0; w < block; w++)
-				{
-					int index = y * block + w;
-
-					cout << y << "->" << w;
-
-					weights[x]->HostData[index].Print();
-
-					cout << " ";
-				}
-			}
-		}
-
-		cout << "\n";
-	}
-
+    n->Print();
     cout << "print finished\n";
 
-	for(int i = 0; i < layers.size(); i++)
-	{
-		delete layers[i];
-	}
-
-	for(int i = 0; i < weights.size(); i++)
-	{
-		delete weights[i];
-	}
+    delete n;
 
 //	delete layers[1];
 //	delete weight0to1;
@@ -194,38 +133,4 @@ int main(int argc, char **argv)
 	return 0;
 }
 
-inline double randomValue()
-{
-	return 0.5 + (double)rand() / RAND_MAX;
-}
-
-void randomValues(double* a, int n)
-{
-	int i;
-	for (i = 0; i < n; ++i)
-	{
-		a[i] = randomValue();
-
-//		cout << "random = " << a[i] << "\n";
-	}
-}
-
-void randomValues(Node* a, int n)
-{
-	int i;
-	for (i = 0; i < n; ++i)
-	{
-		a[i].Self.Value = randomValue();
-		a[i].Bias.Value = randomValue();
-	}
-}
-
-void randomValues(Element* a, int n)
-{
-	int i;
-	for (i = 0; i < n; ++i)
-	{
-		a[i].Value = randomValue();
-	}
-}
 
