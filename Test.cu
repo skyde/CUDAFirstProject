@@ -6,6 +6,8 @@
 
 #include "SharedData.cu"
 #include "Layer.cu"
+#include "Element.cu"
+#include "Node.cu"
 using namespace std;
 
 //void initGL(int *argc, char **argv);
@@ -31,50 +33,6 @@ using namespace std;
 //		c[index] = a[index] + b[index];
 //	}
 //}
-
-struct __align__(sizeof(double) * 2) Element
-{
-	Element() : Value(0), Derivative(0)
-	{
-//		cout << "Element ctor";
-	}
-
-    double Value, Derivative;
-
-	public:
-	void Print()
-	{
-//		system("Color 1A");
-		cout << "[" << Value;
-//		system("Color 2B");
-#if PRINT_DERIVATIVE
-		cout << " " << Derivative;
-#endif
-		cout << "]";
-	}
-};
-
-struct __align__(sizeof(Element) * 2) Node
-{
-	Node() : Self(), Bias()
-	{
-//		cout << "Node ctor";
-	}
-
-	Element Self, Bias;
-
-	public:
-	void Print()
-	{
-		cout << "(" << Self.Value;
-#if PRINT_DERIVATIVE
-		cout << " " << Self.Derivative;
-#endif
-		cout << ")";
-
-//		cout << "(" << Self.Value << " " << Self.Derivative << ")";
-	}
-};
 
 void randomValues(double* a, int n);
 void randomValues(Node* a, int n);
@@ -175,7 +133,7 @@ int main(int argc, char **argv)
 	weights[0]->HostData[2].Value = 0;
 	weights[0]->HostData[3].Value = 1;
 
-	cout << "Generated random values\n";
+//	cout << "Generated random values\n";
 
 	layers[0]->CopyToDevice();
 	weights[0]->CopyToDevice();
@@ -190,7 +148,6 @@ int main(int argc, char **argv)
 			layers[1]->DeviceData,
 			layers[1]->Length);
 
-    cudaDeviceSynchronize();
 
 	BackwardPass<<<N / M, M>>>(
 			layers[0]->DeviceData,
@@ -215,9 +172,6 @@ int main(int argc, char **argv)
     getLastCudaError("Device kernel execution failed.\n");
 
     cout << "Execution finished, will print\n";
-
-//    int numLayers = 2;
-//    int nodesPerLayer = N;
 
 	for(int y = 0; y < N; y++)
 	{
@@ -246,25 +200,7 @@ int main(int argc, char **argv)
 		cout << "\n";
 	}
 
-//	for(int i = 0; i < layer0->Length && i < 512; i++)
-//	{
-//		cout << "Node.Self " << layer0->HostData[i].Self.Value << " Derivative " << layer0->HostData[i].Self.Derivative << "\n";
-//		cout << "Node.Bias " << layer0->HostData[i].Bias.Value << " Derivative " << layer0->HostData[i].Bias.Derivative << "\n";
-//
-//		for(int x = 0; x < layer1->Length; x++)
-//		{
-//			int w = i * layer1->Length + x;
-//
-//			cout << "Weight.Self " << weights->HostData[w].Value << " Derivative " << weights->HostData[w].Derivative << "\n";
-//		}
-//	}
-
     cout << "print finished\n";
-
-//	leftValues->Dispose();
-//	weights->Dispose();
-//	rightValues->Dispose();
-//	rightBiases->Dispose();
 
 	for(int i = 0; i < layers.size(); i++)
 	{
