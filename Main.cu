@@ -48,6 +48,25 @@ __global__ void BackwardPass(
 	left[index].Self.Derivative = total;
 }
 
+void Forward(NeuralNetwork* n)
+{
+	ForwardPass<<<N / M, M>>>(
+			n->Layers[0]->DeviceData,
+			n->Layers[0]->Length,
+			n->Weights[0]->DeviceData,
+			n->Layers[1]->DeviceData,
+			n->Layers[1]->Length);
+}
+void Backward(NeuralNetwork* n)
+{
+	BackwardPass<<<N / M, M>>>(
+			n->Layers[0]->DeviceData,
+			n->Layers[0]->Length,
+			n->Weights[0]->DeviceData,
+			n->Layers[1]->DeviceData,
+			n->Layers[1]->Length);
+}
+
 int main(int argc, char **argv)
 {
 	NeuralNetwork* n = new NeuralNetwork();
@@ -67,20 +86,8 @@ int main(int argc, char **argv)
 
 	cout << "Copy to device calls after initiated\n";
 
-
-	ForwardPass<<<N / M, M>>>(
-			n->Layers[0]->DeviceData,
-			n->Layers[0]->Length,
-			n->Weights[0]->DeviceData,
-			n->Layers[1]->DeviceData,
-			n->Layers[1]->Length);
-
-	BackwardPass<<<N / M, M>>>(
-			n->Layers[0]->DeviceData,
-			n->Layers[0]->Length,
-			n->Weights[0]->DeviceData,
-			n->Layers[1]->DeviceData,
-			n->Layers[1]->Length);
+	Forward(n);
+	Backward(n);
 
 	cout << "RunPass initiated\n";
 
