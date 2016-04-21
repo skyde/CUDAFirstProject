@@ -104,7 +104,7 @@ public:
 		{
 			for(int x = 0; x < LAYERS; x++)
 			{
-				layers[x]->HostData[y].Print();
+				((Node)layers[x]->HostData[y]).Print();
 				cout << " ";
 
 				int nextLayer = x + 1;
@@ -117,7 +117,7 @@ public:
 
 						cout << y << "->" << w;
 
-						weights[x]->HostData[index].Print();
+						((Element)weights[x]->HostData[index]).Print();
 
 						cout << " ";
 					}
