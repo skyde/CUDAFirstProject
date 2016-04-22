@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <iostream>
 #include <array>
+#include "NeuralNetwork.cu"
 using namespace std;
 
-#include "NeuralNetwork.cu"
 __global__ void ForwardPass(
 		Node* left,
 		int leftLength,
@@ -164,6 +164,10 @@ int main(int argc, char **argv)
 	n->CopyToDevice();
 
 //	double targetValues[2] = { 4.0, -2.0 };
+
+//	array<int>* test;
+//
+//	cout << test.size();
 
 	SharedData<double>* targetValues = new SharedData<double>(N);
 	targetValues->HostData[0] = 12;
