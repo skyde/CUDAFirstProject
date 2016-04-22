@@ -36,13 +36,16 @@ __global__ void BackwardPass(
 
 	double total = 0;
 
+	double leftValue = left[index].Self.Value;
+
 	for(int i = 0; i < rightLength; i++)
 	{
 		int w = index * rightLength + i;
+		double rightDerivative = right[i].Self.Derivative;
 
-		weights[w].Derivative = weights[w].Value * right[i].Self.Derivative;
+		weights[w].Derivative = leftValue * rightDerivative;//weights[w].Value * right[i].Self.Derivative;
 
-		total += weights[w].Derivative;
+		total += weights[w].Value * rightDerivative;
 	}
 
 	left[index].Self.Derivative = total;

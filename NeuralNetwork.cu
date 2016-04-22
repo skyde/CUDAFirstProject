@@ -9,17 +9,10 @@
 #include "Layer.cu"
 #include "Element.cu"
 #include "Node.cu"
+#include "Globals.h"
 //#include "NeuralNetworkDevice.cu"
 using namespace std;
 
-// Total Threads
-#define N 2 // Nodes per layer
-// Block Size
-#define M 1 // 512
-
-#define LAYERS 2
-
-#define PRINT_DERIVATIVE true
 
 //template <class T>
 class NeuralNetwork
