@@ -48,6 +48,7 @@ __global__ void BackwardPass(
 		total += weights[w].Value * rightDerivative;
 	}
 
+	left[index].Bias.Derivative = total;
 	left[index].Self.Derivative = total;
 }
 
