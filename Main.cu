@@ -3,6 +3,15 @@
 #include <array>
 #include "NeuralNetwork.cu"
 using namespace std;
+#include <vector>
+
+//int main()
+//{
+//  vector<vector<double>> ar;
+//  ReadMNIST(10000,784,ar);
+//
+//  return 0;
+//}
 
 __global__ void ForwardPass(
 		Node* left,
@@ -194,15 +203,21 @@ int main(int argc, char **argv)
 		Backward(n);
 		IterateDerivative(n);
 
-		n->CopyToHost();
+		if(PRINT_ERROR)
+		{
+			n->CopyToHost();
+		}
 
 	    cudaDeviceSynchronize();
 
-	    cout << ", error " << n->CaculateError(targetValues->HostData, false);
+	    if(PRINT_ERROR)
+	    {
+			cout << ", error " << n->CaculateError(targetValues->HostData, false);
 
-		cout << " ";
+			cout << " ";
 
-	    n->CaculateError(targetValues->HostData, true);
+			n->CaculateError(targetValues->HostData, true);
+	    }
 
 		cout << "\n";
 

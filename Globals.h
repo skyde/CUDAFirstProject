@@ -3,6 +3,7 @@
 #define PRINT_DERIVATIVE true
 #define PRINT_PRECISION 6
 #define PRINT_VERBOSE false
+#define PRINT_ERROR true
 
 #define STEP_SIZE 0.001
 
