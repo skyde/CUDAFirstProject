@@ -62,12 +62,19 @@ __global__ void CaculateDerivativesFromDifferencePass(
 	values[index].Self.Derivative = v * 0.01;
 }
 
-__global__ void IterateDerivativePass(Element* weights)
+__global__ void IterateWeightDerivativePass(Element* weights)
 {
 	int index = threadIdx.x + blockIdx.x * blockDim.x;
 
 	weights[index].Value += weights[index].Derivative;
-//	left[index].Self.Derivative = total;
+}
+
+__global__ void IterateNodeDerivativePass(Node* nodes)
+{
+	int index = threadIdx.x + blockIdx.x * blockDim.x;
+
+	nodes[index].Self.Value += nodes[index].Self.Derivative;
+	nodes[index].Bias.Value += nodes[index].Bias.Derivative;
 }
 
 void Forward(NeuralNetwork* n)
@@ -104,20 +111,16 @@ void Backward(NeuralNetwork* n)
 				n->Layers[i + 1]->DeviceData,
 				n->Layers[i + 1]->Length);
 	}
-
-//	BackwardPass<<<N / M, M>>>(
-//			n->Layers[0]->DeviceData,
-//			n->Layers[0]->Length,
-//			n->Weights[0]->DeviceData,
-//			n->Layers[1]->DeviceData,
-//			n->Layers[1]->Length);
 }
 
 void IterateDerivative(NeuralNetwork* n)
 {
-	int length = n->Weights[0]->Length;
-	IterateDerivativePass<<<length / M, M>>>(
-			n->Weights[0]->DeviceData);
+	for(int i = 0; i < n->Weights.size(); ++i)
+	{
+		int length = n->Weights[i]->Length;
+		IterateWeightDerivativePass<<<length, 1>>>(
+				n->Weights[i]->DeviceData);
+	}
 }
 
 int main(int argc, char **argv)
