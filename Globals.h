@@ -15,10 +15,10 @@ namespace
 {
 	int NodesInLayer(int layer)
 	{
-//		if(layer == LAYERS - 1)
-//		{
-//			return 1;
-//		}
+		if(layer >= LAYERS - 1)
+		{
+			return 1;
+		}
 
 		return 3;
 	}

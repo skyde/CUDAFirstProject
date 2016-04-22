@@ -177,8 +177,8 @@ int main(int argc, char **argv)
 
 	SharedData<double>* targetValues = new SharedData<double>(NodesInLayer(LAYERS - 1));
 	targetValues->HostData[0] = 12;
-	targetValues->HostData[1] = -10;
-	targetValues->HostData[2] = 5;
+//	targetValues->HostData[1] = -10;
+//	targetValues->HostData[2] = 5;
 	targetValues->CopyToDevice();
 
 //	cout << "Copy to device calls after initiated\n";
