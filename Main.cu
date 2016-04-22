@@ -24,7 +24,7 @@ __global__ void ForwardPass(
 
 	value += right[index].Bias.Value;
 
-	if(right->Activation == ActivationTanH)
+	if(right[index].Activation == ActivationTanH)
 	{
 		value = tanh(value);
 	}
@@ -41,7 +41,7 @@ __global__ void BackwardPass(
 {
 	int index = threadIdx.x + blockIdx.x * blockDim.x;
 
-	double total = 0;
+	double value = 0;
 
 	double leftValue = left[index].Self.Value;
 
@@ -52,11 +52,17 @@ __global__ void BackwardPass(
 
 		weights[w].Derivative = leftValue * rightDerivative;//weights[w].Value * right[i].Self.Derivative;
 
-		total += weights[w].Value * rightDerivative;
+		value += weights[w].Value * rightDerivative;
 	}
 
-	left[index].Bias.Derivative = total;
-	left[index].Self.Derivative = total;
+	left[index].Bias.Derivative = value;
+
+	if(left[index].Activation == ActivationTanH)
+	{
+		value = 2.0 / (1.0 + pow(2.718281828459, -2.0 * value)) - 1.0;//tanh(value);
+	}
+
+	left[index].Self.Derivative = value;
 }
 
 __global__ void CaculateDerivativesFromDifferencePass(
@@ -181,7 +187,7 @@ int main(int argc, char **argv)
 
 //	cout << "Copy to device calls after initiated\n";
 
-	for(int i = 0; i < 100; ++i)
+	for(int i = 0; i < 1000; ++i)
 	{
 		cout << "\n";
 		cout << "Epoch " << i;
