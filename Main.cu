@@ -185,7 +185,7 @@ int main(int argc, char **argv)
 
 	cout << "\n";
 
-	for(int i = 0; i < 100; ++i)
+	for(int i = 0; i < 1000; ++i)
 	{
 		cout << "Epoch " << (i + 1);
 

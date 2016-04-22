@@ -7,7 +7,7 @@
 #define STEP_SIZE 0.001
 
 #define M 1 // 512
-#define LAYERS 3
+#define LAYERS 4
 
 // Total Threads
 //#define N 3 // Nodes per layer
@@ -22,7 +22,7 @@ namespace
 			return 10;
 		}
 
-		return 100;
+		return 768;
 	}
 }
 
