@@ -161,27 +161,6 @@ int main(int argc, char **argv)
 		n->Layers[1]->HostData[i].Activation = ActivationTanH;
 	}
 
-//	n->Layers[1]->HostData[0].Self.Derivative = 0.01;
-//	n->Layers[1]->HostData[1].Self.Derivative = 0.001;
-
-	// np.rand(fanin, fanout) / np.sqrt(fanin);
-
-//	n->Weights[0]->HostData[0].Value = 1;
-//	n->Weights[0]->HostData[1].Value = 0.5;
-//	n->Weights[0]->HostData[2].Value = -0.5;
-//
-//	n->Weights[1]->HostData[0].Value = 0.2;
-//	n->Weights[1]->HostData[1].Value = -0.4;
-//	n->Weights[1]->HostData[2].Value = 0.3;
-//
-//	n->Weights[2]->HostData[0].Value = -.8;
-//	n->Weights[2]->HostData[1].Value = 0.3;
-//	n->Weights[2]->HostData[2].Value = -0.7;
-
-//	n->Weights[0]->HostData[2].Value = -0.5;
-//	n->Weights[0]->HostData[2].Value = 0;
-//	n->Weights[0]->HostData[3].Value = 1;
-
 	n->CopyToDevice();
 
 //	double targetValues[2] = { 4.0, -2.0 };

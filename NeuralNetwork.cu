@@ -41,6 +41,10 @@ public:
 
 //				cout << "weights " << i - 1 << ", l = " << length << "\n";
 			}
+
+			randomValues(
+					Layers[i]->HostData,
+					Layers[i]->Length);
 		}
 	}
 
@@ -149,7 +153,7 @@ public:
 		int i;
 		for (i = 0; i < n; ++i)
 		{
-			a[i].Self.Value = randomValue();
+//			a[i].Self.Value = randomValue();
 			a[i].Bias.Value = randomValue();
 		}
 	}
