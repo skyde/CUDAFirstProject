@@ -22,7 +22,7 @@ __global__ void ForwardPass(
 		value += left[i].Self.Value * weights[w].Value;
 	}
 
-	right[index].Self.Value = value;
+	right[index].Self.Value = value + right[index].Bias.Value;
 }
 
 __global__ void BackwardPass(
@@ -51,7 +51,7 @@ __global__ void BackwardPass(
 	left[index].Self.Derivative = total;
 }
 
-__global__ void SetTargetValues(
+__global__ void CaculateDerivativesFromTargetsPass(
 		Node* values,
 		double* targets)
 {
@@ -80,12 +80,12 @@ void Forward(NeuralNetwork* n)
 			n->Layers[1]->Length);
 }
 
-void SetTargetValues(NeuralNetwork* n, SharedData<double>* targetValues)
+void CaculateDerivativesFromTargets(NeuralNetwork* n, SharedData<double>* targetValues)
 {
 	SharedData<Node>* layer = n->Layers[n->Layers.size() - 1];
 	int length = layer->Length;
 
-	SetTargetValues<<<length, 1>>>(
+	CaculateDerivativesFromTargetsPass<<<length, 1>>>(
 			layer->DeviceData,
 			targetValues->DeviceData);
 }
@@ -140,7 +140,7 @@ int main(int argc, char **argv)
 		cout << "\n";
 
 		Forward(n);
-		SetTargetValues(n, targetValues);
+		CaculateDerivativesFromTargets(n, targetValues);
 		Backward(n);
 		IterateDerivative(n);
 

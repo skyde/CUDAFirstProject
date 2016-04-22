@@ -25,6 +25,12 @@ struct __align__(sizeof(Element) * 2) Node
 #endif
 		cout << ")";
 
+		cout << "{" << Bias.Value;
+#if PRINT_DERIVATIVE
+		cout << " " << Bias.Derivative;
+#endif
+		cout << "}";
+
 //		cout << "(" << Self.Value << " " << Self.Derivative << ")";
 	}
 };
