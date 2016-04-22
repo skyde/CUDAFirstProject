@@ -11,11 +11,8 @@
 #include "Element.cu"
 #include "Node.cu"
 #include "Globals.h"
-//#include "NeuralNetworkDevice.cu"
 using namespace std;
 
-
-//template <class T>
 class NeuralNetwork
 {
 public:
@@ -54,30 +51,6 @@ public:
 	array<SharedData<Node>*, LAYERS> Layers;
 	array<SharedData<Element>*, LAYERS - 1> Weights;
 
-//	void randomValues(double* a, int n);
-//	void randomValues(Node* a, int n);
-//	void randomValues(Element* a, int n);
-
-//	void Forward()
-//	{
-//		ForwardPass<<<N / M, M>>>(
-//				layers[0]->DeviceData,
-//				layers[0]->Length,
-//				weights[0]->DeviceData,
-//				layers[1]->DeviceData,
-//				layers[1]->Length);
-//	}
-//
-//	void Backward()
-//	{
-//		BackwardPass<<<N / M, M>>>(
-//				layers[0]->DeviceData,
-//				layers[0]->Length,
-//				weights[0]->DeviceData,
-//				layers[1]->DeviceData,
-//				layers[1]->Length);
-//	}
-
 	void CopyToDevice()
 	{
 		for(int i = 0; i < Layers.size(); ++i)
@@ -104,9 +77,24 @@ public:
 		}
 	}
 
-	void Print()
+	double CaculateError(double* targets)
 	{
+		SharedData<Node>* outputs = Layers[Layers.size() - 1];
 
+		double value = 0;
+
+		for(int i = 0; i < outputs->Length; i++)
+		{
+			double target = outputs->HostData[i].Self.Value;
+
+			double diff = abs(targets[i] - target);
+
+//			cout << "(" << diff << ")";
+
+			value += diff * diff;
+		}
+
+		return value;
 	}
 
 	void PrintVerbose()

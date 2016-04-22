@@ -169,17 +169,15 @@ int main(int argc, char **argv)
 	targetValues->HostData[0] = 12;
 	targetValues->HostData[1] = -10;
 	targetValues->HostData[2] = 5;
-//	targetValues->HostData[1] = -2;
 	targetValues->CopyToDevice();
 
 //	cout << "Copy to device calls after initiated\n";
 
 	cout << "\n";
 
-	for(int i = 0; i < 100; ++i)
+	for(int i = 0; i < 500; ++i)
 	{
-		cout << "Epoch " << i;
-		cout << "\n";
+		cout << "Epoch " << (i + 1);
 
 		Forward(n);
 		CaculateDerivativesFromDifference(n, targetValues);
@@ -189,6 +187,10 @@ int main(int argc, char **argv)
 		n->CopyToHost();
 
 	    cudaDeviceSynchronize();
+
+	    cout << ", error " << n->CaculateError(targetValues->HostData);
+
+		cout << "\n";
 
 		if(i == 0)
 		{
