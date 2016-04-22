@@ -103,6 +103,11 @@ public:
 
 	void Print()
 	{
+
+	}
+
+	void PrintVerbose()
+	{
 		for(int y = 0; y < N; y++)
 		{
 			for(int x = 0; x < LAYERS; x++)

@@ -174,9 +174,10 @@ int main(int argc, char **argv)
 
 //	cout << "Copy to device calls after initiated\n";
 
+	cout << "\n";
+
 	for(int i = 0; i < 100; ++i)
 	{
-		cout << "\n";
 		cout << "Epoch " << i;
 		cout << "\n";
 
@@ -189,8 +190,13 @@ int main(int argc, char **argv)
 
 	    cudaDeviceSynchronize();
 
-	    n->Print();
+		if(i == 0)
+		{
+		    n->PrintVerbose();
+		}
 	}
+
+    n->PrintVerbose();
 
 //	cout << "RunPass initiated\n";
 
