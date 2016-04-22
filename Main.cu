@@ -22,7 +22,14 @@ __global__ void ForwardPass(
 		value += left[i].Self.Value * weights[w].Value;
 	}
 
-	right[index].Self.Value = value + right[index].Bias.Value;
+	value += right[index].Bias.Value;
+
+	if(right->Activation == ActivationTanH)
+	{
+		value = tanh(value);
+	}
+
+	right[index].Self.Value = value;
 }
 
 __global__ void BackwardPass(
@@ -141,6 +148,18 @@ int main(int argc, char **argv)
 	n->Layers[0]->HostData[0].Self.Value = 1;
 	n->Layers[1]->HostData[0].Self.Value = 0;
 	n->Layers[2]->HostData[0].Self.Value = 0;
+
+	for(int i = 0; i < n->Layers[1]->Length; ++i)
+	{
+//		cout << "Node = " << i << ((Node)n->Layers[1]->HostData[i]).Activation << "\n";
+
+		n->Layers[1]->HostData[i].Activation = ActivationTanH;
+
+//		cout << ActivationNothing << "\n";
+//		cout << ActivationTanH << "\n";
+//
+//		cout << "Node = " << i << ((Node)n->Layers[1]->HostData[i]).Activation << "\n";
+	}
 
 //	n->Layers[1]->HostData[0].Self.Derivative = 0.01;
 //	n->Layers[1]->HostData[1].Self.Derivative = 0.001;

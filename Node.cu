@@ -7,14 +7,21 @@
 #include "Globals.h"
 using namespace std;
 
-struct __align__(sizeof(Element) * 2) Node
+enum ActivationStyle
 {
-	Node() : Self(), Bias()
+	ActivationNothing = 0,
+	ActivationTanH = 1
+};
+
+struct __align__(sizeof(Element)) Node
+{
+	Node() : Self(), Bias(), Activation()
 	{
 
 	}
 
 	Element Self, Bias;
+	ActivationStyle Activation;
 
 	public:
 	void Print()
