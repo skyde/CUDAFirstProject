@@ -73,7 +73,7 @@ __global__ void IterateNodeDerivativePass(Node* nodes)
 {
 	int index = threadIdx.x + blockIdx.x * blockDim.x;
 
-	nodes[index].Self.Value += nodes[index].Self.Derivative;
+//	nodes[index].Self.Value += nodes[index].Self.Derivative;
 	nodes[index].Bias.Value += nodes[index].Bias.Derivative;
 }
 
@@ -81,6 +81,8 @@ void Forward(NeuralNetwork* n)
 {
 	for(int i = 0; i < n->Layers.size() - 1; ++i)
 	{
+//		cout << i << " " << i + 1 << "\n";
+
 		ForwardPass<<<N / M, M>>>(
 				n->Layers[i]->DeviceData,
 				n->Layers[i]->Length,
@@ -121,6 +123,14 @@ void IterateDerivative(NeuralNetwork* n)
 		IterateWeightDerivativePass<<<length, 1>>>(
 				n->Weights[i]->DeviceData);
 	}
+
+	// Don't iterate input or output layer
+	for(int i = 1; i < n->Layers.size() - 1; ++i)
+	{
+		int length = n->Layers[i]->Length;
+		IterateNodeDerivativePass<<<length, 1>>>(
+				n->Layers[i]->DeviceData);
+	}
 }
 
 int main(int argc, char **argv)
@@ -128,23 +138,25 @@ int main(int argc, char **argv)
 	NeuralNetwork* n = new NeuralNetwork();
 
 	n->Layers[0]->HostData[0].Self.Value = 1;
-	n->Layers[0]->HostData[1].Self.Value = 2;
+	n->Layers[1]->HostData[0].Self.Value = 0;
+	n->Layers[2]->HostData[0].Self.Value = 0;
 
-	n->Layers[1]->HostData[0].Self.Derivative = 0.01;
-	n->Layers[1]->HostData[1].Self.Derivative = 0.001;
+//	n->Layers[1]->HostData[0].Self.Derivative = 0.01;
+//	n->Layers[1]->HostData[1].Self.Derivative = 0.001;
 
 	n->Weights[0]->HostData[0].Value = 1;
-	n->Weights[0]->HostData[1].Value = 0.5;
-	n->Weights[0]->HostData[2].Value = 0;
-	n->Weights[0]->HostData[3].Value = 1;
+	n->Weights[1]->HostData[0].Value = 0.5;
+//	n->Weights[0]->HostData[2].Value = -0.5;
+//	n->Weights[0]->HostData[2].Value = 0;
+//	n->Weights[0]->HostData[3].Value = 1;
 
 	n->CopyToDevice();
 
 //	double targetValues[2] = { 4.0, -2.0 };
 
 	SharedData<double>* targetValues = new SharedData<double>(N);
-	targetValues->HostData[0] = 4;
-	targetValues->HostData[1] = -2;
+	targetValues->HostData[0] = 12;
+//	targetValues->HostData[1] = -2;
 	targetValues->CopyToDevice();
 
 //	cout << "Copy to device calls after initiated\n";

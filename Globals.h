@@ -3,8 +3,8 @@
 #define PRINT_DERIVATIVE true
 
 // Total Threads
-#define N 2 // Nodes per layer
+#define N 1 // Nodes per layer
 // Block Size
-#define M 2 // 512
+#define M 1 // 512
 
-#define LAYERS 2
+#define LAYERS 3
