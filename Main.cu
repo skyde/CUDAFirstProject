@@ -152,26 +152,30 @@ int main(int argc, char **argv)
 	NeuralNetwork* n = new NeuralNetwork();
 
 	n->Layers[0]->HostData[0].Self.Value = 1;
-	n->Layers[1]->HostData[0].Self.Value = 0;
-	n->Layers[2]->HostData[0].Self.Value = 0;
+	n->Layers[0]->HostData[1].Self.Value = 5;
+	n->Layers[0]->HostData[2].Self.Value = -5;
 
+	// Middle layers are activated
 	for(int i = 0; i < n->Layers[1]->Length; ++i)
 	{
-//		cout << "Node = " << i << ((Node)n->Layers[1]->HostData[i]).Activation << "\n";
-
 		n->Layers[1]->HostData[i].Activation = ActivationTanH;
-
-//		cout << ActivationNothing << "\n";
-//		cout << ActivationTanH << "\n";
-//
-//		cout << "Node = " << i << ((Node)n->Layers[1]->HostData[i]).Activation << "\n";
 	}
 
 //	n->Layers[1]->HostData[0].Self.Derivative = 0.01;
 //	n->Layers[1]->HostData[1].Self.Derivative = 0.001;
 
 	n->Weights[0]->HostData[0].Value = 1;
-	n->Weights[1]->HostData[0].Value = 0.5;
+	n->Weights[0]->HostData[1].Value = 0.5;
+	n->Weights[0]->HostData[2].Value = -0.5;
+
+	n->Weights[1]->HostData[0].Value = 0.2;
+	n->Weights[1]->HostData[1].Value = -0.4;
+	n->Weights[1]->HostData[2].Value = 0.3;
+
+	n->Weights[2]->HostData[0].Value = -.8;
+	n->Weights[2]->HostData[1].Value = 0.3;
+	n->Weights[2]->HostData[2].Value = -0.7;
+
 //	n->Weights[0]->HostData[2].Value = -0.5;
 //	n->Weights[0]->HostData[2].Value = 0;
 //	n->Weights[0]->HostData[3].Value = 1;
@@ -182,6 +186,8 @@ int main(int argc, char **argv)
 
 	SharedData<double>* targetValues = new SharedData<double>(N);
 	targetValues->HostData[0] = 12;
+	targetValues->HostData[1] = -10;
+	targetValues->HostData[2] = 5;
 //	targetValues->HostData[1] = -2;
 	targetValues->CopyToDevice();
 
