@@ -95,12 +95,22 @@ void CaculateDerivativesFromDifference(NeuralNetwork* n, SharedData<double>* tar
 
 void Backward(NeuralNetwork* n)
 {
-	BackwardPass<<<N / M, M>>>(
-			n->Layers[0]->DeviceData,
-			n->Layers[0]->Length,
-			n->Weights[0]->DeviceData,
-			n->Layers[1]->DeviceData,
-			n->Layers[1]->Length);
+	for(int i = n->Layers.size() - 2; i >= 0; --i)
+	{
+		BackwardPass<<<N / M, M>>>(
+				n->Layers[i]->DeviceData,
+				n->Layers[i]->Length,
+				n->Weights[i]->DeviceData,
+				n->Layers[i + 1]->DeviceData,
+				n->Layers[i + 1]->Length);
+	}
+
+//	BackwardPass<<<N / M, M>>>(
+//			n->Layers[0]->DeviceData,
+//			n->Layers[0]->Length,
+//			n->Weights[0]->DeviceData,
+//			n->Layers[1]->DeviceData,
+//			n->Layers[1]->Length);
 }
 
 void IterateDerivative(NeuralNetwork* n)
@@ -136,7 +146,7 @@ int main(int argc, char **argv)
 
 //	cout << "Copy to device calls after initiated\n";
 
-	for(int i = 0; i < 1000; ++i)
+	for(int i = 0; i < 100; ++i)
 	{
 		cout << "\n";
 		cout << "Epoch " << i;
