@@ -256,5 +256,6 @@
     ../SharedData.cu \
     ../Layer.cu \
     ../Element.cu \
+    /Volumes/Xcode/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../include/c++/v1/iomanip \
     ../Globals.h \
     ../Node.cu

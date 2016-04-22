@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iomanip>
 #include <stdio.h>
 #include <iostream>
 #include <array>
@@ -20,9 +21,9 @@ struct __align__(sizeof(double) * 2) Element
 	public:
 	void Print()
 	{
-		cout << "[" << Value;
+		cout << "[" << setprecision(PRINT_PRECISION) << Value;
 #if PRINT_DERIVATIVE
-		cout << " " << Derivative;
+		cout << " " << setprecision(PRINT_PRECISION) << Derivative;
 #endif
 		cout << "]";
 	}

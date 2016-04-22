@@ -42,9 +42,12 @@ public:
 //				cout << "weights " << i - 1 << ", l = " << length << "\n";
 			}
 
-			randomValues(
-					Layers[i]->HostData,
-					Layers[i]->Length);
+			if(i > 0 && i < Layers.size() - 1)
+			{
+				randomValues(
+						Layers[i]->HostData,
+						Layers[i]->Length);
+			}
 		}
 	}
 

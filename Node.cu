@@ -26,15 +26,15 @@ struct __align__(sizeof(Element)) Node
 	public:
 	void Print()
 	{
-		cout << "(" << Self.Value;
+		cout << "(" << setprecision(PRINT_PRECISION) << Self.Value;
 #if PRINT_DERIVATIVE
-		cout << " " << Self.Derivative;
+		cout << " " << setprecision(PRINT_PRECISION) << Self.Derivative;
 #endif
 		cout << ")";
 
-		cout << "{" << Bias.Value;
+		cout << "{" << setprecision(PRINT_PRECISION) << Bias.Value;
 #if PRINT_DERIVATIVE
-		cout << " " << Bias.Derivative;
+		cout << " " << setprecision(PRINT_PRECISION) << Bias.Derivative;
 #endif
 		cout << "}";
 
