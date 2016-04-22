@@ -73,7 +73,7 @@ __global__ void CaculateDerivativesFromDifferencePass(
 
 	double v = targets[index] - values[index].Self.Value;
 
-	values[index].Self.Derivative = v * 0.01;
+	values[index].Self.Derivative = v * STEP_SIZE;
 }
 
 __global__ void IterateWeightDerivativePass(Element* weights)
@@ -177,8 +177,8 @@ int main(int argc, char **argv)
 
 	SharedData<double>* targetValues = new SharedData<double>(NodesInLayer(LAYERS - 1));
 	targetValues->HostData[0] = 12;
-//	targetValues->HostData[1] = -10;
-//	targetValues->HostData[2] = 5;
+	targetValues->HostData[1] = -10;
+	targetValues->HostData[2] = 5;
 	targetValues->CopyToDevice();
 
 //	cout << "Copy to device calls after initiated\n";
@@ -198,17 +198,24 @@ int main(int argc, char **argv)
 
 	    cudaDeviceSynchronize();
 
-	    cout << ", error " << n->CaculateError(targetValues->HostData);
+	    cout << ", error " << n->CaculateError(targetValues->HostData, false);
+
+		cout << " ";
+
+	    n->CaculateError(targetValues->HostData, true);
 
 		cout << "\n";
 
-//		if(i == 0)
-//		{
+		if(PRINT_VERBOSE)
+		{
 		    n->PrintVerbose();
-//		}
+		}
 	}
 
+
+//	#if !PRINT_VERBOSE
 //    n->PrintVerbose();
+//	#endif
 
 //	cout << "RunPass initiated\n";
 

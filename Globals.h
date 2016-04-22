@@ -2,10 +2,12 @@
 
 #define PRINT_DERIVATIVE true
 #define PRINT_PRECISION 6
+#define PRINT_VERBOSE false
+
+#define STEP_SIZE 0.001
 
 #define M 1 // 512
-
-#define LAYERS 2
+#define LAYERS 3
 
 // Total Threads
 //#define N 3 // Nodes per layer
@@ -17,10 +19,10 @@ namespace
 	{
 		if(layer >= LAYERS - 1)
 		{
-			return 1;
+			return 10;
 		}
 
-		return 3;
+		return 100;
 	}
 }
 

@@ -78,7 +78,7 @@ public:
 		}
 	}
 
-	double CaculateError(double* targets)
+	double CaculateError(double* targets, bool print = false)
 	{
 		SharedData<Node>* outputs = Layers[Layers.size() - 1];
 
@@ -90,7 +90,10 @@ public:
 
 			double diff = abs(targets[i] - target);
 
-//			cout << "(" << diff << ")";
+			if(print)
+			{
+				cout << "(" << diff << ")";
+			}
 
 			value += diff * diff;
 		}
