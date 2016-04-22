@@ -51,6 +51,17 @@ __global__ void BackwardPass(
 	left[index].Self.Derivative = total;
 }
 
+__global__ void SetTargetValues(
+		Node* values,
+		double* targets)
+{
+	int index = threadIdx.x + blockIdx.x * blockDim.x;
+
+	double v = targets[index] - values[index].Self.Value;
+
+	values[index].Self.Derivative = v * 0.01;
+}
+
 __global__ void IterateDerivativePass(Element* weights)
 {
 	int index = threadIdx.x + blockIdx.x * blockDim.x;
@@ -67,6 +78,16 @@ void Forward(NeuralNetwork* n)
 			n->Weights[0]->DeviceData,
 			n->Layers[1]->DeviceData,
 			n->Layers[1]->Length);
+}
+
+void SetTargetValues(NeuralNetwork* n, SharedData<double>* targetValues)
+{
+	SharedData<Node>* layer = n->Layers[n->Layers.size() - 1];
+	int length = layer->Length;
+
+	SetTargetValues<<<length, 1>>>(
+			layer->DeviceData,
+			targetValues->DeviceData);
 }
 
 void Backward(NeuralNetwork* n)
@@ -103,15 +124,23 @@ int main(int argc, char **argv)
 
 	n->CopyToDevice();
 
+//	double targetValues[2] = { 4.0, -2.0 };
+
+	SharedData<double>* targetValues = new SharedData<double>(N);
+	targetValues->HostData[0] = 4;
+	targetValues->HostData[1] = -2;
+	targetValues->CopyToDevice();
+
 //	cout << "Copy to device calls after initiated\n";
 
-	for(int i = 0; i < 10; ++i)
+	for(int i = 0; i < 100; ++i)
 	{
 		cout << "\n";
 		cout << "Epoch " << i;
 		cout << "\n";
 
 		Forward(n);
+		SetTargetValues(n, targetValues);
 		Backward(n);
 		IterateDerivative(n);
 
@@ -138,6 +167,7 @@ int main(int argc, char **argv)
 //    cout << "print finished\n";
 
     delete n;
+    delete targetValues;
 
     cout << "dispose finished\n";
 
