@@ -4,6 +4,7 @@
 #include <array>
 #include "helper_cuda.h"
 #include <stdlib.h>
+#include <random>
 
 #include "SharedData.cu"
 #include "Layer.cu"
@@ -20,6 +21,7 @@ class NeuralNetwork
 public:
 	NeuralNetwork()
 	{
+		normal_distribution<double> distribution(0, 1.0);
 //		array<SharedData<Node>*, LAYERS> layers;
 //		array<SharedData<Element>*, LAYERS - 1> weights;
 
@@ -33,7 +35,11 @@ public:
 
 				Weights[i - 1] = new SharedData<Element>(length);
 
-				cout << "weights " << i - 1 << ", l = " << length << "\n";
+				randomValues(
+						Weights[i - 1]->HostData,
+						Weights[i - 1]->Length);
+
+//				cout << "weights " << i - 1 << ", l = " << length << "\n";
 			}
 		}
 	}
@@ -121,19 +127,22 @@ public:
 		}
 	}
 
+	default_random_engine generator;
+	normal_distribution<double> distribution;
+
 	inline double randomValue()
 	{
-		return 0.5 + (double)rand() / RAND_MAX;
+		return (distribution(generator) / N) * 0.01;
 	}
 
-	void randomValues(double* a, int n)
-	{
-		int i;
-		for (i = 0; i < n; ++i)
-		{
-			a[i] = randomValue();
-		}
-	}
+//	void randomValues(double* a, int n)
+//	{
+//		int i;
+//		for (i = 0; i < n; ++i)
+//		{
+//			a[i] = randomValue();
+//		}
+//	}
 
 	void randomValues(Node* a, int n)
 	{
