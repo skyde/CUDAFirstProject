@@ -95,14 +95,17 @@ void Forward(NeuralNetwork* n)
 {
 	for(int i = 0; i < n->Layers.size() - 1; ++i)
 	{
-//		cout << i << " " << i + 1 << "\n";
+		int leftLength = n->Layers[i]->Length;
+		int rightLength = n->Layers[i + 1]->Length;
 
-		ForwardPass<<<N / M, M>>>(
+//		cout << "\n" << leftLength << "\n";
+
+		ForwardPass<<<rightLength / M, M>>>(
 				n->Layers[i]->DeviceData,
-				n->Layers[i]->Length,
+				leftLength,
 				n->Weights[i]->DeviceData,
 				n->Layers[i + 1]->DeviceData,
-				n->Layers[i + 1]->Length);
+				rightLength);
 	}
 }
 
@@ -120,12 +123,15 @@ void Backward(NeuralNetwork* n)
 {
 	for(int i = n->Layers.size() - 2; i >= 0; --i)
 	{
-		BackwardPass<<<N / M, M>>>(
+		int leftLength = n->Layers[i]->Length;
+		int rightLength = n->Layers[i + 1]->Length;
+
+		BackwardPass<<<leftLength / M, M>>>(
 				n->Layers[i]->DeviceData,
-				n->Layers[i]->Length,
+				leftLength,
 				n->Weights[i]->DeviceData,
 				n->Layers[i + 1]->DeviceData,
-				n->Layers[i + 1]->Length);
+				rightLength);
 	}
 }
 
@@ -156,7 +162,7 @@ int main(int argc, char **argv)
 	n->Layers[0]->HostData[2].Self.Value = -5;
 
 	// Middle layers are activated
-	for(int i = 0; i < n->Layers[1]->Length; ++i)
+	for(int i = 1; i < LAYERS - 1; ++i)
 	{
 		n->Layers[1]->HostData[i].Activation = ActivationTanH;
 	}
@@ -169,7 +175,7 @@ int main(int argc, char **argv)
 //
 //	cout << test.size();
 
-	SharedData<double>* targetValues = new SharedData<double>(N);
+	SharedData<double>* targetValues = new SharedData<double>(NodesInLayer(LAYERS - 1));
 	targetValues->HostData[0] = 12;
 	targetValues->HostData[1] = -10;
 	targetValues->HostData[2] = 5;
@@ -179,7 +185,7 @@ int main(int argc, char **argv)
 
 	cout << "\n";
 
-	for(int i = 0; i < 500; ++i)
+	for(int i = 0; i < 100; ++i)
 	{
 		cout << "Epoch " << (i + 1);
 
@@ -196,13 +202,13 @@ int main(int argc, char **argv)
 
 		cout << "\n";
 
-		if(i == 0)
-		{
+//		if(i == 0)
+//		{
 		    n->PrintVerbose();
-		}
+//		}
 	}
 
-    n->PrintVerbose();
+//    n->PrintVerbose();
 
 //	cout << "RunPass initiated\n";
 

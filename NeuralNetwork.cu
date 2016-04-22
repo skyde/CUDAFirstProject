@@ -19,12 +19,11 @@ public:
 	NeuralNetwork()
 	{
 		normal_distribution<double> distribution(0, 1.0);
-//		array<SharedData<Node>*, LAYERS> layers;
-//		array<SharedData<Element>*, LAYERS - 1> weights;
 
 		for(int i = 0; i < Layers.size(); i++)
 		{
-			Layers[i] = new SharedData<Node>(N);
+			cout << "Nodes in Layer " << i << " " << NodesInLayer(i) << "\n";
+			Layers[i] = new SharedData<Node>(NodesInLayer(i));
 
 			if(i != 0)
 			{
@@ -34,7 +33,8 @@ public:
 
 				randomValues(
 						Weights[i - 1]->HostData,
-						Weights[i - 1]->Length);
+						Weights[i - 1]->Length,
+						i);
 
 //				cout << "weights " << i - 1 << ", l = " << length << "\n";
 			}
@@ -43,7 +43,8 @@ public:
 			{
 				randomValues(
 						Layers[i]->HostData,
-						Layers[i]->Length);
+						Layers[i]->Length,
+						i);
 			}
 		}
 	}
@@ -99,10 +100,15 @@ public:
 
 	void PrintVerbose()
 	{
-		for(int y = 0; y < N; y++)
+		for(int y = 0; y < NodesInLayer(0); y++)
 		{
 			for(int x = 0; x < LAYERS; x++)
 			{
+				if(x >= NodesInLayer(y))
+				{
+					continue;
+				}
+
 				((Node)Layers[x]->HostData[y]).Print();
 				cout << " ";
 
@@ -130,9 +136,9 @@ public:
 	default_random_engine generator;
 	normal_distribution<double> distribution;
 
-	inline double randomValue()
+	inline double randomValue(int layer)
 	{
-		return (distribution(generator) / N) * 0.01;
+		return (distribution(generator) / NodesInLayer(layer)) * 0.01;
 	}
 
 //	void randomValues(double* a, int n)
@@ -144,22 +150,22 @@ public:
 //		}
 //	}
 
-	void randomValues(Node* a, int n)
+	void randomValues(Node* a, int n, int layer)
 	{
 		int i;
 		for (i = 0; i < n; ++i)
 		{
 //			a[i].Self.Value = randomValue();
-			a[i].Bias.Value = randomValue();
+			a[i].Bias.Value = randomValue(layer);
 		}
 	}
 
-	void randomValues(Element* a, int n)
+	void randomValues(Element* a, int n, int layer)
 	{
 		int i;
 		for (i = 0; i < n; ++i)
 		{
-			a[i].Value = randomValue();
+			a[i].Value = randomValue(layer);
 		}
 	}
 
