@@ -207,9 +207,9 @@ int main(int argc, char **argv)
 
 	NeuralNetwork* n = new NeuralNetwork();
 
-	n->Layers[0]->HostData[0].Self.Value = 1;
-	n->Layers[0]->HostData[1].Self.Value = 5;
-	n->Layers[0]->HostData[2].Self.Value = -5;
+//	n->Layers[0]->HostData[0].Self.Value = 1;
+//	n->Layers[0]->HostData[1].Self.Value = 5;
+//	n->Layers[0]->HostData[2].Self.Value = -5;
 
 	// Middle layers are activated
 	for(int i = 1; i < LAYERS - 1; ++i)
@@ -241,6 +241,7 @@ int main(int argc, char **argv)
 	{
 		for(int x = 0; x < data.size(); ++x)
 		{
+			SetInputValues(n, data[x]->Elements[currentElement % MNIST_ELEMENTS_TO_LOAD]->Data);
 //			SharedData<double>* targetValues =
 //					data[x]->Elements[0]->Data;
 			SharedData<double>* targetValues = data[x]->TargetValues;
