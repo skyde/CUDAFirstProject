@@ -20,9 +20,18 @@ public:
 			Elements[i] = new MNISTElement();
 		}
 
-		cout << "Start ReadMNISTData\n";
+//		cout << "Start ReadMNISTData\n";
 		ReadMNISTData(fileName, Elements);
-		cout << "End ReadMNISTData\n";
+//		cout << "End ReadMNISTData\n";
+
+		TargetValues = new SharedData<double>(NODES_IN_LAST_LAYER);
+
+		for(int i = 0; i < NODES_IN_LAST_LAYER; i++)
+		{
+			TargetValues->HostData[i] = i == index ? 1 : 0;
+		}
+
+		TargetValues->CopyToDevice();
 	}
 
 	virtual ~MNISTData()
@@ -33,6 +42,7 @@ public:
 //	array<SharedData<double>*>, MNIST_ELEMENTS_TO_LOAD> Values;
 
 	array<MNISTElement*, MNIST_ELEMENTS_TO_LOAD> Elements;
+	SharedData<double>* TargetValues;
 
 //	SharedData<double>* Values = new SharedData<double>(MNIST_ELEMENT_SIZE);
 

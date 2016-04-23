@@ -103,6 +103,15 @@ __global__ void IterateNodeDerivativePass(Node* nodes)
 	nodes[index].Bias.Value += nodes[index].Bias.Derivative;
 }
 
+__global__ void SetInputValuesPass(
+		Node* values,
+		double* targets)
+{
+	int index = threadIdx.x + blockIdx.x * blockDim.x;
+
+	values[index].Self.Value = targets[index];
+}
+
 void Forward(NeuralNetwork* n)
 {
 	for(int i = 0; i < n->Layers.size() - 1; ++i)
@@ -129,6 +138,16 @@ void CaculateDerivativesFromDifference(NeuralNetwork* n, SharedData<double>* tar
 	CaculateDerivativesFromDifferencePass<<<length, 1>>>(
 			layer->DeviceData,
 			targetValues->DeviceData);
+}
+
+void SetInputValues(NeuralNetwork* n, SharedData<double>* values)
+{
+	SharedData<Node>* layer = n->Layers[0];
+	int length = layer->Length;
+
+	SetInputValuesPass<<<length, 1>>>(
+			layer->DeviceData,
+			values->DeviceData);
 }
 
 void Backward(NeuralNetwork* n)
@@ -206,47 +225,58 @@ int main(int argc, char **argv)
 //
 //	cout << test.size();
 
-	SharedData<double>* targetValues = new SharedData<double>(NodesInLayer(LAYERS - 1));
-	targetValues->HostData[0] = 12;
-	targetValues->HostData[1] = -10;
-	targetValues->HostData[2] = 5;
-	targetValues->CopyToDevice();
+//	SharedData<double>* targetValues = new SharedData<double>(NodesInLayer(LAYERS - 1));
+//	targetValues->HostData[0] = 12;
+//	targetValues->HostData[1] = -10;
+//	targetValues->HostData[2] = 5;
+//	targetValues->CopyToDevice();
 
 //	cout << "Copy to device calls after initiated\n";
 
 	cout << "\n";
 
+	int currentElement = 0;
+
 	for(int i = 0; i < 1000; ++i)
 	{
-		cout << "Epoch " << (i + 1);
-
-		Forward(n);
-		CaculateDerivativesFromDifference(n, targetValues);
-		Backward(n);
-		IterateDerivative(n);
-
-		if(PRINT_ERROR)
+		for(int x = 0; x < data.size(); ++x)
 		{
-			n->CopyToHost();
+//			SharedData<double>* targetValues =
+//					data[x]->Elements[0]->Data;
+			SharedData<double>* targetValues = data[x]->TargetValues;
+
+			cout << "Epoch " << (i + 1);
+
+			Forward(n);
+			CaculateDerivativesFromDifference(n, data[x]->TargetValues);
+			Backward(n);
+			IterateDerivative(n);
+
+			if(PRINT_ERROR)
+			{
+				n->CopyToHost();
+			}
+
+			cudaDeviceSynchronize();
+
+			if(PRINT_ERROR)
+			{
+				cout << ", error " << n->CaculateError(targetValues->HostData, false);
+
+				cout << " ";
+
+				n->CaculateError(targetValues->HostData, true);
+			}
+
+			cout << "\n";
+
+			if(PRINT_VERBOSE)
+			{
+				n->PrintVerbose();
+			}
 		}
 
-	    cudaDeviceSynchronize();
-
-	    if(PRINT_ERROR)
-	    {
-			cout << ", error " << n->CaculateError(targetValues->HostData, false);
-
-			cout << " ";
-
-			n->CaculateError(targetValues->HostData, true);
-	    }
-
-		cout << "\n";
-
-		if(PRINT_VERBOSE)
-		{
-		    n->PrintVerbose();
-		}
+		currentElement++;
 	}
 
 
@@ -270,7 +300,10 @@ int main(int argc, char **argv)
 //    cout << "print finished\n";
 
     delete n;
-    delete targetValues;
+	for(int i = 0; i < data.size(); ++i)
+	{
+		delete data[i];
+	}
 
     cout << "dispose finished\n";
 

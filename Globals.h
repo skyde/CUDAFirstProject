@@ -11,12 +11,13 @@
 #define LAYERS 4
 
 #define MNIST_ELEMENT_SIZE 28 * 28
-#define MNIST_ELEMENTS_TO_LOAD 1000
+#define MNIST_ELEMENTS_TO_LOAD 100 // 1000
 
 #define PRINT_MNIST_DATA false
 
 // Total Threads
 //#define N 3 // Nodes per layer
+#define NODES_IN_LAST_LAYER 10
 #ifndef NODES_IN_LAYER
 #define NODES_IN_LAYER
 namespace
@@ -25,7 +26,7 @@ namespace
 	{
 		if(layer >= LAYERS - 1)
 		{
-			return 10;
+			return NODES_IN_LAST_LAYER;
 		}
 
 		return 768;

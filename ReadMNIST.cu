@@ -39,7 +39,7 @@ class MNISTElement
 	{
 		fileName = "Data/" + fileName;
 
-		cout << "ReadMNISTData\n";
+//		cout << "ReadMNISTData\n";
 
 		ifstream input( fileName, std::ios::binary );
 
@@ -74,7 +74,7 @@ class MNISTElement
 			}
 		}
 
-		cout << "Finished load \n";
+//		cout << "Finished load \n";
 		cout << MNIST_ELEMENTS_TO_LOAD << " " << output.size() << "\n";
 
 #if PRINT_MNIST_DATA
