@@ -57,6 +57,7 @@ namespace
 			}
 		}
 
+#if PRINT_MNIST_DATA
 		for(int i = 0; i < MNIST_ELEMENTS_TO_LOAD; ++i)
 		{
 			int c = 0;
@@ -76,6 +77,8 @@ namespace
 		}
 
 		cout << buffer.size() << "\n";
+#endif
+
 
 		return values;
 	}

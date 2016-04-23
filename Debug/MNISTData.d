@@ -1,4 +1,4 @@
-./Main.o : ../Main.cu \
+./MNISTData.o : ../MNISTData.cu \
     /Developer/NVIDIA/CUDA-7.5/bin/../include/cuda_runtime.h \
     /Developer/NVIDIA/CUDA-7.5/bin/../include/host_config.h \
     /Developer/NVIDIA/CUDA-7.5/bin/../include/builtin_types.h \
@@ -246,19 +246,10 @@
     /usr/include/_types/_nl_item.h \
     /Volumes/Xcode/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../include/c++/v1/bitset \
     /Volumes/Xcode/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../include/c++/v1/__bit_reference \
-    /Volumes/Xcode/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../include/c++/v1/array \
-    ../NeuralNetwork.cu \
     ../helper_cuda.h \
-    /Volumes/Xcode/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../include/c++/v1/random \
-    /Volumes/Xcode/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../include/c++/v1/numeric \
+    ../Globals.h \
+    ../ReadMNIST.cpp \
+    /Volumes/Xcode/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../include/c++/v1/array \
     /Volumes/Xcode/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../include/c++/v1/vector \
     /Volumes/Xcode/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../include/c++/v1/__split_buffer \
-    ../SharedData.cu \
-    ../Layer.cu \
-    ../Element.cu \
-    /Volumes/Xcode/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../include/c++/v1/iomanip \
-    ../Globals.h \
-    ../Node.cu \
-    /Volumes/Xcode/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../include/c++/v1/fstream \
-    ../ReadMNIST.cpp \
-    ../MNISTData.cu
+    /Volumes/Xcode/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../include/c++/v1/fstream

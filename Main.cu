@@ -6,6 +6,7 @@ using namespace std;
 #include <vector>
 #include <fstream>
 #include "ReadMNIST.cpp"
+#include "MNISTData.cu"
 
 //int main()
 //{
@@ -170,14 +171,15 @@ int main(int argc, char **argv)
 {
 	cout << "Reading in MNIST\n";
 
-	array<double*, MNIST_ELEMENTS_TO_LOAD> values = ReadMNISTData("data0.txt");
+//	array<double*, MNIST_ELEMENTS_TO_LOAD> values = ReadMNISTData("data0.txt");
 
+	MNISTData* data = new MNISTData(0);
 //	vector< vector<double> > ar;
 //	ReadMNIST(10000, 784, ar);
 
 	cout << "End reading in MNIST\n";
 
-	return 0;
+//	return 0;
 
 	NeuralNetwork* n = new NeuralNetwork();
 

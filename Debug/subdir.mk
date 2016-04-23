@@ -6,6 +6,7 @@
 CU_SRCS += \
 ../Element.cu \
 ../Layer.cu \
+../MNISTData.cu \
 ../Main.cu \
 ../NeuralNetwork.cu \
 ../Node.cu \
@@ -17,6 +18,7 @@ CPP_SRCS += \
 OBJS += \
 ./Element.o \
 ./Layer.o \
+./MNISTData.o \
 ./Main.o \
 ./NeuralNetwork.o \
 ./Node.o \
@@ -26,6 +28,7 @@ OBJS += \
 CU_DEPS += \
 ./Element.d \
 ./Layer.d \
+./MNISTData.d \
 ./Main.d \
 ./NeuralNetwork.d \
 ./Node.d \
