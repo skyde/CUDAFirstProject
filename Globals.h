@@ -13,7 +13,7 @@
 #define MNIST_ELEMENT_SIZE 28 * 28
 #define MNIST_ELEMENTS_TO_LOAD 1000
 
-#define PRINT_MNIST_DATA true
+#define PRINT_MNIST_DATA false
 
 // Total Threads
 //#define N 3 // Nodes per layer
