@@ -184,7 +184,59 @@ void IterateDerivative(NeuralNetwork* n)
 	}
 }
 
+void SetData(array<MNISTData*, 10> data, NeuralNetwork* n, int number, int currentElement)
+{
+	SetInputValues(n, data[number]->Elements[currentElement % MNIST_ELEMENTS_TO_LOAD]->Data);
+	SharedData<double>* targetValues = data[number]->TargetValues;
+}
 
+void CaculateAccuracy(array<MNISTData*, 10> data, NeuralNetwork* n)
+{
+	double total = 0.0;
+	double totalNum = 0.0;
+
+	for(int i = 0; i < 10; ++i)
+	{
+		for(int x = 0; x < data.size(); ++x)
+		{
+			SetData(data, n, x, i);
+
+			Forward(n);
+
+			n->Layers[LAYERS - 1]->CopyToHost();
+
+			cudaDeviceSynchronize();
+
+			int index = -1;
+			double largest = -1;
+
+			for(int v = 0; v < n->Layers[LAYERS - 1]->Length; v++)
+			{
+				double value = n->Layers[LAYERS - 1]->HostData[v].Self.Value;
+
+				if(value > largest)
+				{
+					largest = value;
+					index = v;
+				}
+			}
+
+			bool correct = index == x ? true : false;
+
+			if(correct)
+			{
+				total++;
+			}
+
+			totalNum++;
+
+		}
+	}
+
+	double accuracy = total / totalNum;
+
+	cout << "Accuracy " << accuracy << "\n";
+}
 
 int main(int argc, char **argv)
 {
@@ -219,62 +271,47 @@ int main(int argc, char **argv)
 
 	n->CopyToDevice();
 
-//	double targetValues[2] = { 4.0, -2.0 };
-
-//	array<int>* test;
-//
-//	cout << test.size();
-
-//	SharedData<double>* targetValues = new SharedData<double>(NodesInLayer(LAYERS - 1));
-//	targetValues->HostData[0] = 12;
-//	targetValues->HostData[1] = -10;
-//	targetValues->HostData[2] = 5;
-//	targetValues->CopyToDevice();
-
-//	cout << "Copy to device calls after initiated\n";
-
 	cout << "\n";
 
 	int currentElement = 0;
 
-	for(int i = 0; i < 1000; ++i)
+	for(int i = 0; i < 1000000; ++i)
 	{
+		cout << "Epoch " << (i + 1);
+
 		for(int x = 0; x < data.size(); ++x)
 		{
-			SetInputValues(n, data[x]->Elements[currentElement % MNIST_ELEMENTS_TO_LOAD]->Data);
-//			SharedData<double>* targetValues =
-//					data[x]->Elements[0]->Data;
-			SharedData<double>* targetValues = data[x]->TargetValues;
-
-			cout << "Epoch " << (i + 1);
+			SetData(data, n, x, currentElement);
 
 			Forward(n);
 			CaculateDerivativesFromDifference(n, data[x]->TargetValues);
 			Backward(n);
 			IterateDerivative(n);
 
-			if(PRINT_ERROR)
-			{
-				n->CopyToHost();
-			}
+//			if(PRINT_ERROR)
+//			{
+//				n->CopyToHost();
 
-			cudaDeviceSynchronize();
-
-			if(PRINT_ERROR)
-			{
-				cout << ", error " << n->CaculateError(targetValues->HostData, false);
-
-				cout << " ";
-
-				n->CaculateError(targetValues->HostData, true);
-			}
-
-			cout << "\n";
+//				cout << ", error " << n->CaculateError(targetValues->HostData, false);
+//
+//				cout << " ";
+//
+//				n->CaculateError(targetValues->HostData, true);
+//			}
 
 			if(PRINT_VERBOSE)
 			{
 				n->PrintVerbose();
 			}
+		}
+		cout << "\n";
+
+
+		cudaDeviceSynchronize();
+
+		if(i % 10 == 0)
+		{
+			CaculateAccuracy(data, n);
 		}
 
 		currentElement++;
