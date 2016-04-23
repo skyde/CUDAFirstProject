@@ -5,14 +5,14 @@
 #define PRINT_VERBOSE false
 #define PRINT_ERROR true
 
-#define STEP_SIZE 0.001
+#define STEP_SIZE 0.00005
 
 #define M 1 // 512
 #define LAYERS 3
 
 #define MNIST_ELEMENT_SIZE 28 * 28
-#define MNIST_ELEMENTS_TO_LOAD 30 // 1000
-#define MNIST_TRAINING_DATA_LENGTH 10 // 1000
+#define MNIST_ELEMENTS_TO_LOAD 300 // 1000
+#define MNIST_TRAINING_DATA_LENGTH 100 // 1000
 
 #define PRINT_MNIST_DATA false
 

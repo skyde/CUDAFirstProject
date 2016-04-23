@@ -141,7 +141,7 @@ public:
 
 	inline double randomValue(int layer)
 	{
-		return (distribution(generator) / NodesInLayer(layer)) * 0.01;
+		return (distribution(generator) / NodesInLayer(layer)) * 0.001;
 	}
 
 //	void randomValues(double* a, int n)
