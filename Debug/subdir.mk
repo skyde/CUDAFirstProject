@@ -11,12 +11,16 @@ CU_SRCS += \
 ../Node.cu \
 ../SharedData.cu 
 
+CPP_SRCS += \
+../ReadMNIST.cpp 
+
 OBJS += \
 ./Element.o \
 ./Layer.o \
 ./Main.o \
 ./NeuralNetwork.o \
 ./Node.o \
+./ReadMNIST.o \
 ./SharedData.o 
 
 CU_DEPS += \
@@ -27,6 +31,9 @@ CU_DEPS += \
 ./Node.d \
 ./SharedData.d 
 
+CPP_DEPS += \
+./ReadMNIST.d 
+
 
 # Each subdirectory must supply rules for building sources it contributes
 %.o: ../%.cu
@@ -34,6 +41,14 @@ CU_DEPS += \
 	@echo 'Invoking: NVCC Compiler'
 	/Developer/NVIDIA/CUDA-7.5/bin/nvcc -G -g -O0 -gencode arch=compute_30,code=sm_30  -odir "." -M -o "$(@:%.o=%.d)" "$<"
 	/Developer/NVIDIA/CUDA-7.5/bin/nvcc -G -g -O0 --compile --relocatable-device-code=false -gencode arch=compute_30,code=compute_30 -gencode arch=compute_30,code=sm_30  -x cu -o  "$@" "$<"
+	@echo 'Finished building: $<'
+	@echo ' '
+
+%.o: ../%.cpp
+	@echo 'Building file: $<'
+	@echo 'Invoking: NVCC Compiler'
+	/Developer/NVIDIA/CUDA-7.5/bin/nvcc -G -g -O0 -gencode arch=compute_30,code=sm_30  -odir "." -M -o "$(@:%.o=%.d)" "$<"
+	/Developer/NVIDIA/CUDA-7.5/bin/nvcc -G -g -O0 --compile  -x c++ -o  "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 

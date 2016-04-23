@@ -4,6 +4,8 @@
 #include "NeuralNetwork.cu"
 using namespace std;
 #include <vector>
+#include <fstream>
+#include "ReadMNIST.cpp"
 
 //int main()
 //{
@@ -162,8 +164,21 @@ void IterateDerivative(NeuralNetwork* n)
 	}
 }
 
+
+
 int main(int argc, char **argv)
 {
+	cout << "Reading in MNIST\n";
+
+	double* data = ReadMNISTData("data0.txt", 10000);
+
+//	vector< vector<double> > ar;
+//	ReadMNIST(10000, 784, ar);
+
+	cout << "End reading in MNIST\n";
+
+	return 0;
+
 	NeuralNetwork* n = new NeuralNetwork();
 
 	n->Layers[0]->HostData[0].Self.Value = 1;
