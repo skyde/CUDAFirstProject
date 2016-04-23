@@ -5,6 +5,33 @@ using namespace std;
 #include "helper_cuda.h"
 #include "Globals.h"
 #include "ReadMNIST.cpp"
+#include "SharedData.cu"
+
+class MNISTElement
+{
+	public:
+	MNISTElement(double* values)
+	{
+		Values = new SharedData<double>(MNIST_ELEMENT_SIZE);
+
+//		cout << "Create element\n";
+
+		for(int i = 0; i < MNIST_ELEMENT_SIZE; ++i)
+		{
+			Values->HostData[i] = values[i];
+		}
+
+//		Values->HostData[2] = 5;
+		Values->CopyToDevice();
+	}
+
+	SharedData<double>* Values;
+
+	virtual ~MNISTElement()
+	{
+//		Values->
+	}
+};
 
 class MNISTData
 {
@@ -13,29 +40,29 @@ public:
 	{
 		string fileName = "data" + to_string(index) + ".txt";
 
-		array<double*, MNIST_ELEMENTS_TO_LOAD> values = ReadMNISTData(fileName);
+		cout << fileName << "\n";
 
-//		Length = length;
-//		TotalBytes = length * sizeof(T);
-//
-//		HostData = (T *) calloc(1, TotalBytes);
-//		checkCudaErrors(cudaMalloc((void **)& DeviceData, TotalBytes));
+		array<double*, MNIST_ELEMENTS_TO_LOAD> elements = ReadMNISTData(fileName);
 
-//		for(int i = 0; i < length; i++)
-//		{
-//			HostData[i] = new T();
-//		}
+		for(int i = 0; i < elements.size(); ++i)
+		{
+//			MNISTElement e = ;
 
-//		cout << "construct" << "\n";
+			Elements[i] = new MNISTElement(elements[i]);
+		}
 	}
 
 	virtual ~MNISTData()
 	{
-//		free(HostData);
-//		cudaFree(DeviceData);
 
-//		cout << "deconstruct" << "\n";
 	}
+
+//	array<SharedData<double>*>, MNIST_ELEMENTS_TO_LOAD> Values;
+
+	array<MNISTElement*, MNIST_ELEMENT_SIZE> Elements;
+
+//	SharedData<double>* Values = new SharedData<double>(MNIST_ELEMENT_SIZE);
+
 
 //	void Dispose()
 //	{
