@@ -195,11 +195,13 @@ void CaculateAccuracy(array<MNISTData*, 10> data, NeuralNetwork* n)
 	double total = 0.0;
 	double totalNum = 0.0;
 
-	for(int i = 0; i < 10; ++i)
+	int start = MNIST_ELEMENTS_TO_LOAD - MNIST_TRAINING_DATA_LENGTH;
+
+	for(int i = 0; i < MNIST_TRAINING_DATA_LENGTH; ++i)
 	{
 		for(int x = 0; x < data.size(); ++x)
 		{
-			SetData(data, n, x, i);
+			SetData(data, n, x, i + start);
 
 			Forward(n);
 
@@ -281,7 +283,7 @@ int main(int argc, char **argv)
 
 		for(int x = 0; x < data.size(); ++x)
 		{
-			SetData(data, n, x, currentElement);
+			SetData(data, n, x, currentElement % (MNIST_ELEMENTS_TO_LOAD - MNIST_TRAINING_DATA_LENGTH));
 
 			Forward(n);
 			CaculateDerivativesFromDifference(n, data[x]->TargetValues);
@@ -309,7 +311,7 @@ int main(int argc, char **argv)
 
 		cudaDeviceSynchronize();
 
-		if(i % 10 == 0)
+		if(i % 5 == 0)
 		{
 			CaculateAccuracy(data, n);
 		}
