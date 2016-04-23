@@ -23,6 +23,10 @@ public:
 //		cout << "Start ReadMNISTData\n";
 		ReadMNISTData(fileName, Elements);
 //		cout << "End ReadMNISTData\n";
+		for(int i = 0; i < Elements.size(); ++i)
+		{
+			Elements[i]->Init();
+		}
 
 		TargetValues = new SharedData<double>(NODES_IN_LAST_LAYER);
 
