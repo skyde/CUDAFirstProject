@@ -83,7 +83,8 @@ class MNISTElement
 			int c = 0;
 			for(int x = 0; x < MNIST_ELEMENT_SIZE; ++x)
 			{
-				cout << output[i]->Data->HostData[x] << " ";
+//				cout << output[i]->Data->HostData[x] << " ";
+//				cout << (output[i]->Data->HostData[x] == 0 ? " " : "0");
 
 				c++;
 
