@@ -8,7 +8,7 @@ using namespace std;
 #include <fstream>
 #include <cstring> // for std::strlen
 #include <cstddef>
-
+#include "Globals.h"
 
 namespace
 {
@@ -25,7 +25,7 @@ namespace
 //	  return result;
 //	  }
 
-	double* ReadMNISTData(string fileName, int elementsToLoad)
+	array<double*, MNIST_ELEMENTS_TO_LOAD> ReadMNISTData(string fileName)
 	{
 		fileName = "Data/" + fileName;
 
@@ -35,18 +35,18 @@ namespace
 		            std::istreambuf_iterator<char>(input)),
 		            (std::istreambuf_iterator<char>()));
 
-		const int elementLength = 28 * 28;
+//		const int elementLength = 28 * 28;
 
-		double* values[elementsToLoad];
+		array<double*, MNIST_ELEMENTS_TO_LOAD> values;
 
 		int b = 0;
 		int totalLength = buffer.size();
-		for(int i = 0; i < elementsToLoad; ++i)
+		for(int i = 0; i < MNIST_ELEMENTS_TO_LOAD; ++i)
 		{
 //			HostData = (T *) calloc(1, TotalBytes);
-			values[i] = (double*) calloc(elementLength, sizeof(double));
+			values[i] = (double*) calloc(MNIST_ELEMENT_SIZE, sizeof(double));
 
-			for(int x = 0; x < elementLength; ++x)
+			for(int x = 0; x < MNIST_ELEMENT_SIZE; ++x)
 			{
 				unsigned int value = (unsigned char) buffer[b];
 				double d = value / 255.0;
@@ -57,10 +57,10 @@ namespace
 			}
 		}
 
-		for(int i = 0; i < elementsToLoad; ++i)
+		for(int i = 0; i < MNIST_ELEMENTS_TO_LOAD; ++i)
 		{
 			int c = 0;
-			for(int x = 0; x < elementLength; ++x)
+			for(int x = 0; x < MNIST_ELEMENT_SIZE; ++x)
 			{
 				cout << values[i][x] << " ";
 
@@ -75,110 +75,9 @@ namespace
 			cout << "\n";
 		}
 
-
-//		int c = 0;
-//		for(int i = 0; i < buffer.size(); ++i)
-//		{
-//			unsigned int value = (unsigned char) buffer[i];
-//			double d = value / 255.0;
-//
-//			cout << d << " ";
-//
-//			c++;
-//
-//			if(c >= 28)
-//			{
-//				cout << "\n";
-//				c = 0;
-//			}
-//		}
-
 		cout << buffer.size() << "\n";
-//		buffer.
-//		ofstream outfile (fileName, ofstream::binary);
 
-//		return ;
-//
-//		ifstream inFile;
-//			size_t size = 0; // here
-//
-//			inFile.open(fileName, ios::in|ios::binary|ios::ate );
-//			char* oData = 0;
-//
-//			inFile.seekg(0, ios::end); // set the pointer to the end
-//			size = inFile.tellg() ; // get the length of the file
-//			cout << "Size of file: " << size;
-//			inFile.seekg(0, ios::beg); // set the pointer to the beginning
-//
-//			oData = new char[ size+1 ]; //  for the '\0'
-//			inFile.read( oData, size );
-//			oData[size] = '\0' ; // set '\0'
-//			cout << " oData size: " << strlen(oData) << "\n";
-//
-//			//print data
-//			for ( size_t i = 0; i < strlen(oData); i++ )
-//			{
-//				cout << "oData["<<i<<"] " << oData[i];
-//				cout << "\n";
-//				cout << oData[i] << " + 'a' = " << ( oData[i] + 'a' );
-//				cout << "\n\n";
-//
-//			}
-
-
-
-
-//		cout << fileName << "\n";
-//
-////		ofstream outfile (fileName, ofstream::binary);
-//
-//		ifstream inFile;
-//		size_t size = 0; // here
-//
-////		inFile.
-//
-//		inFile.open(fileName, ios::in|ios::binary|ios::ate );
-//
-//		cout << "Fail " << inFile.failbit << "\n";
-//
-////		char* oData = 0;
-////
-////		inFile.seekg(0, ios::end); // set the pointer to the end
-////		size = inFile.tellg() ; // get the length of the file
-////		cout << "Size of file: " << size << "\n";
-////		inFile.seekg(0, ios::beg); // set the pointer to the beginning
-//
-////		cout << "File = " << inFile << "\n";
-//		char* oData[length];
-//
-//		fread(oData, length, 1, fileName);
-//
-//
-////		while(inFile.is_open()) // To get you all the lines.
-////		{
-////			inFile.seekg(0, ios::end);
-////			size = inFile.tellg();
-////			inFile.seekg(0, ios::beg);
-////
-////			oData = new char[size+1];
-////			inFile.read(oData, size);
-////			oData[size] = '\0';
-////
-//////			for(int i = 0; i < size; ++i)
-//////			{
-//////				cout << oData[i] << "\n";
-//////			}
-////		}
-//		inFile.close();
-//
-//		cout << "begin trace\n";
-//
-//		for(int i = 0; i < size; ++i)
-//		{
-//			cout << oData[i] << "\n";
-//		}
-//
-////		cout << oData << "\n";
+		return values;
 	}
 }
 
