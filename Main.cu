@@ -170,7 +170,7 @@ int main(int argc, char **argv)
 {
 	cout << "Reading in MNIST\n";
 
-	double* data = ReadMNISTData("data0.txt", 10000);
+	double* data = ReadMNISTData("data0.txt", 1000);
 
 //	vector< vector<double> > ar;
 //	ReadMNIST(10000, 784, ar);

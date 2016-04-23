@@ -25,7 +25,7 @@ namespace
 //	  return result;
 //	  }
 
-	double* ReadMNISTData(string fileName, int length)
+	double* ReadMNISTData(string fileName, int elementsToLoad)
 	{
 		fileName = "Data/" + fileName;
 
@@ -35,25 +35,63 @@ namespace
 		            std::istreambuf_iterator<char>(input)),
 		            (std::istreambuf_iterator<char>()));
 
-		int c = 0;
-		for(int i = 0; i < buffer.size(); ++i)
+		const int elementLength = 28 * 28;
+
+		double* values[elementsToLoad];
+
+		int b = 0;
+		int totalLength = buffer.size();
+		for(int i = 0; i < elementsToLoad; ++i)
 		{
-			unsigned int value = (unsigned char) buffer[i];
-			double d = value / 255.0;
+//			HostData = (T *) calloc(1, TotalBytes);
+			values[i] = (double*) calloc(elementLength, sizeof(double));
 
-//			unsigned short _byteswap_ushort(unsigned short value);
-
-			cout << d << " ";
-//			cout << ((int)buffer[i] == 0 ? 0 : 1);
-
-			c++;
-
-			if(c >= 28)
+			for(int x = 0; x < elementLength; ++x)
 			{
-				cout << "\n";
-				c = 0;
+				unsigned int value = (unsigned char) buffer[b];
+				double d = value / 255.0;
+
+				values[i][x] = d;
+
+				b++;
 			}
 		}
+
+		for(int i = 0; i < elementsToLoad; ++i)
+		{
+			int c = 0;
+			for(int x = 0; x < elementLength; ++x)
+			{
+				cout << values[i][x] << " ";
+
+				c++;
+
+				if(c >= 28)
+				{
+					cout << "\n";
+					c = 0;
+				}
+			}
+			cout << "\n";
+		}
+
+
+//		int c = 0;
+//		for(int i = 0; i < buffer.size(); ++i)
+//		{
+//			unsigned int value = (unsigned char) buffer[i];
+//			double d = value / 255.0;
+//
+//			cout << d << " ";
+//
+//			c++;
+//
+//			if(c >= 28)
+//			{
+//				cout << "\n";
+//				c = 0;
+//			}
+//		}
 
 		cout << buffer.size() << "\n";
 //		buffer.
