@@ -261,4 +261,5 @@
     ../Node.cu \
     /Volumes/Xcode/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../include/c++/v1/fstream \
     ../ReadMNIST.cpp \
-    ../MNISTData.cu
+    ../MNISTData.cu \
+    ../ReadMNIST.cu

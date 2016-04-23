@@ -1,37 +1,10 @@
 #pragma once
-
 #include <iostream>
 using namespace std;
 #include "helper_cuda.h"
 #include "Globals.h"
-#include "ReadMNIST.cpp"
-#include "SharedData.cu"
-
-class MNISTElement
-{
-	public:
-	MNISTElement(double* values)
-	{
-		Values = new SharedData<double>(MNIST_ELEMENT_SIZE);
-
-//		cout << "Create element\n";
-
-		for(int i = 0; i < MNIST_ELEMENT_SIZE; ++i)
-		{
-			Values->HostData[i] = values[i];
-		}
-
-//		Values->HostData[2] = 5;
-		Values->CopyToDevice();
-	}
-
-	SharedData<double>* Values;
-
-	virtual ~MNISTElement()
-	{
-//		Values->
-	}
-};
+#include "ReadMNIST.cu"
+//#include "SharedData.cu"
 
 class MNISTData
 {
@@ -42,14 +15,14 @@ public:
 
 		cout << fileName << "\n";
 
-		array<double*, MNIST_ELEMENTS_TO_LOAD> elements = ReadMNISTData(fileName);
-
-		for(int i = 0; i < elements.size(); ++i)
+		for(int i = 0; i < Elements.size(); ++i)
 		{
-//			MNISTElement e = ;
-
-			Elements[i] = new MNISTElement(elements[i]);
+			Elements[i] = new MNISTElement();
 		}
+
+		cout << "Start ReadMNISTData\n";
+		ReadMNISTData(fileName, Elements);
+		cout << "End ReadMNISTData\n";
 	}
 
 	virtual ~MNISTData()
@@ -59,7 +32,7 @@ public:
 
 //	array<SharedData<double>*>, MNIST_ELEMENTS_TO_LOAD> Values;
 
-	array<MNISTElement*, MNIST_ELEMENT_SIZE> Elements;
+	array<MNISTElement*, MNIST_ELEMENTS_TO_LOAD> Elements;
 
 //	SharedData<double>* Values = new SharedData<double>(MNIST_ELEMENT_SIZE);
 

@@ -175,7 +175,7 @@ int main(int argc, char **argv)
 
 	array<MNISTData*, 10> data;
 
-	for(int i = 0; i < data.size(); ++i)
+	for(int i = 0; i < 1; ++i) //data.size()
 	{
 		data[i] = new MNISTData(i);
 	}

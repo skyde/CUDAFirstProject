@@ -10,6 +10,7 @@ CU_SRCS += \
 ../Main.cu \
 ../NeuralNetwork.cu \
 ../Node.cu \
+../ReadMNIST.cu \
 ../SharedData.cu 
 
 CPP_SRCS += \
@@ -32,6 +33,7 @@ CU_DEPS += \
 ./Main.d \
 ./NeuralNetwork.d \
 ./Node.d \
+./ReadMNIST.d \
 ./SharedData.d 
 
 CPP_DEPS += \
