@@ -5,7 +5,7 @@
 #define PRINT_VERBOSE false
 #define PRINT_ERROR true
 
-#define STEP_SIZE 0.00005
+#define STEP_SIZE 0.01
 
 #define M 1 // 512
 #define LAYERS 3
