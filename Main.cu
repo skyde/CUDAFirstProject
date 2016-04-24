@@ -313,12 +313,12 @@ int main(int argc, char **argv)
 
 		cudaDeviceSynchronize();
 
-//		if(i % 20 == 0)
-//		{
-//			CaculateAccuracy(data, n);
-//		}
+		if(i % 20 == 0)
+		{
+			CaculateAccuracy(data, n);
+		}
 
-//		currentElement++;
+		currentElement++;
 	}
 
 
