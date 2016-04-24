@@ -290,16 +290,18 @@ int main(int argc, char **argv)
 			Backward(n);
 			IterateDerivative(n);
 
-//			if(PRINT_ERROR)
-//			{
-//				n->CopyToHost();
+			if(PRINT_ERROR)
+			{
+				n->CopyToHost();
 
-//				cout << ", error " << n->CaculateError(targetValues->HostData, false);
-//
+				double* targetValues = data[x]->TargetValues->HostData;
+
+				cout << ", error " << n->CaculateError(targetValues, false);
+
 //				cout << " ";
-//
+
 //				n->CaculateError(targetValues->HostData, true);
-//			}
+			}
 
 			if(PRINT_VERBOSE)
 			{
@@ -311,12 +313,12 @@ int main(int argc, char **argv)
 
 		cudaDeviceSynchronize();
 
-		if(i % 20 == 0)
-		{
-			CaculateAccuracy(data, n);
-		}
+//		if(i % 20 == 0)
+//		{
+//			CaculateAccuracy(data, n);
+//		}
 
-		currentElement++;
+//		currentElement++;
 	}
 
 
